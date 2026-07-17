@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macro | BI de Vendas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --border:#e2e5ea;
+    --text:#1c2230;
+    --text-muted:#6b7280;
+    --primary:#2f6fed;
+    --primary-dark:#1f4fc4;
+    --green:#1a9c5a;
+    --red:#d64545;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header h1{
+    font-size:18px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  header h1 span{color:var(--primary);}
+  #syncStatus{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  nav{
+    display:flex;
+    gap:4px;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:0 24px;
+    overflow-x:auto;
+  }
+  nav button{
+    border:none;
+    background:none;
+    padding:12px 16px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--text-muted);
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  nav button.active{
+    color:var(--primary);
+    border-bottom:2px solid var(--primary);
+  }
+  main{
+    padding:24px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .tab{display:none;}
+  .tab.active{display:block;}
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    margin-bottom:20px;
+  }
+  .kpi{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px 18px;
+  }
+  .kpi .label{font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+  .kpi .value{font-size:24px;font-weight:700;margin-top:6px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:20px;
+  }
+  .card h2{font-size:15px;margin:0 0 14px 0;}
+  form.entry{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    align-items:end;
+  }
+  label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;}
+  input,select{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    background:#fff;
+  }
+  button.primary{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  button.primary:hover{background:var(--primary-dark);}
+  button.secondary{
+    background:#fff;
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:9px 14px;
+    border-radius:6px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .del-btn{color:var(--red);cursor:pointer;font-size:12px;font-weight:600;background:none;border:none;}
+  .empty{color:var(--text-muted);font-size:13px;padding:20px 0;text-align:center;}
+  .config-grid{display:grid;grid-template-columns:1fr;gap:12px;max-width:420px;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge.ok{background:#e5f7ec;color:var(--green);}
+  .badge.pending{background:#fdeeee;color:var(--red);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Macro <span>| BI de Vendas</span></h1>
+  <div id="syncStatus">carregando...</div>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="lancamento">Lançamento de Vendas</button>
+  <button class="tab-btn" data-tab="config">Configurações</button>
+</nav>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="tab active">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Total vendido</div><div class="value" id="kpiTotal">R$ 0,00</div></div>
+      <div class="kpi"><div class="label">Nº de vendas</div><div class="value" id="kpiQtd">0</div></div>
+      <div class="kpi"><div class="label">Ticket médio</div><div class="value" id="kpiTicket">R$ 0,00</div></div>
+      <div class="kpi"><div class="label">Melhor vendedor</div><div class="value" id="kpiTop">-</div></div>
+    </div>
+    <div class="card">
+      <h2>Vendas por dia</h2>
+      <canvas id="chartVendasDia" height="90"></canvas>
+    </div>
+    <div class="card">
+      <h2>Vendas por vendedor</h2>
+      <canvas id="chartVendedor" height="90"></canvas>
+    </div>
+  </section>
+
+  <!-- LANÇAMENTO -->
+  <section id="lancamento" class="tab">
+    <div class="card">
+      <h2>Nova venda</h2>
+      <form class="entry" id="formVenda">
+        <div>
+          <label>Data</label>
+          <input type="date" id="fData" required>
+        </div>
+        <div>
+          <label>Vendedor</label>
+          <input type="text" id="fVendedor" placeholder="Nome" required>
+        </div>
+        <div>
+          <label>Produto / Categoria</label>
+          <input type="text" id="fProduto" placeholder="Ex: Produto A">
+        </div>
+        <div>
+          <label>Forma de pagamento</label>
+          <select id="fPagamento">
+            <option>Pix</option>
+            <option>Cartão</option>
+            <option>Dinheiro</option>
+            <option>Boleto</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label>Valor (R$)</label>
+          <input type="number" id="fValor" step="0.01" min="0" required>
+        </div>
+        <div>
+          <button type="submit" class="primary">Adicionar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Vendas lançadas</h2>
+      <table>
+        <thead>
+          <tr><th>Data</th><th>Vendedor</th><th>Produto</th><th>Pagamento</th><th style="text-align:right">Valor</th><th></th></tr>
+        </thead>
+        <tbody id="tbodyVendas"></tbody>
+      </table>
+      <div class="empty" id="emptyVendas" style="display:none">Nenhuma venda lançada ainda.</div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="config" class="tab">
+    <div class="card">
+      <h2>Conexão com GitHub <span class="badge pending" id="ghBadge">não configurado</span></h2>
+      <div class="config-grid">
+        <div>
+          <label>Owner (usuário/organização)</label>
+          <input type="text" id="cfgOwner" placeholder="leonardoblucena">
+        </div>
+        <div>
+          <label>Repositório</label>
+          <input type="text" id="cfgRepo" placeholder="MACRO-BI">
+        </div>
+        <div>
+          <label>Token (Personal Access Token)</label>
+          <input type="password" id="cfgToken" placeholder="ghp_...">
+        </div>
+        <div>
+          <button class="primary" id="btnSaveConfig">Salvar configuração</button>
+          <button class="secondary" id="btnTestConn">Testar conexão</button>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:10px">
+        O token fica salvo apenas no localStorage do seu navegador (nunca é enviado a nenhum lugar além da API do GitHub).
+        Os dados de vendas são gravados no arquivo <code>data.json</code> na raiz do repositório configurado.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ============ CONFIG / STATE ============
+const CONFIG_KEY = 'macroBI_config';
+const DATA_FILE = 'data.json';
+
+let config = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}');
+let vendas = [];
+let currentSha = null;
+
+// ============ TABS ============
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ============ CONFIG UI ============
+function loadConfigToUI(){
+  document.getElementById('cfgOwner').value = config.owner || '';
+  document.getElementById('cfgRepo').value = config.repo || '';
+  document.getElementById('cfgToken').value = config.token || '';
+  updateGhBadge();
+}
+function updateGhBadge(){
+  const badge = document.getElementById('ghBadge');
+  if(config.owner && config.repo && config.token){
+    badge.textContent = 'configurado';
+    badge.className = 'badge ok';
+  } else {
+    badge.textContent = 'não configurado';
+    badge.className = 'badge pending';
+  }
+}
+document.getElementById('btnSaveConfig').addEventListener('click', ()=>{
+  config = {
+    owner: document.getElementById('cfgOwner').value.trim(),
+    repo: document.getElementById('cfgRepo').value.trim(),
+    token: document.getElementById('cfgToken').value.trim()
+  };
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+  updateGhBadge();
+  alert('Configuração salva.');
+  loadFromGitHub();
+});
+document.getElementById('btnTestConn').addEventListener('click', async ()=>{
+  if(!configIsValid()){ alert('Preencha owner, repositório e token primeiro.'); return; }
+  try{
+    const res = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}`, {
+      headers:{Authorization:`token ${config.token}`}
+    });
+    if(res.ok){ alert('Conexão OK! Repositório encontrado.'); }
+    else{ alert('Falha na conexão: ' + res.status + ' ' + res.statusText); }
+  }catch(e){ alert('Erro: ' + e.message); }
+});
+function configIsValid(){
+  return !!(config.owner && config.repo && config.token);
+}
+
+// ============ GITHUB PERSISTENCE ============
+async function loadFromGitHub(){
+  const statusEl = document.getElementById('syncStatus');
+  if(!configIsValid()){
+    statusEl.textContent = 'configure o GitHub em Configurações';
+    renderAll();
+    return;
+  }
+  statusEl.textContent = 'sincronizando...';
+  try{
+    const res = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${DATA_FILE}`, {
+      headers:{Authorization:`token ${config.token}`}
+    });
+    if(res.status === 404){
+      vendas = [];
+      currentSha = null;
+      statusEl.textContent = 'nenhum dado ainda (novo arquivo será criado ao salvar)';
+    } else if(res.ok){
+      const json = await res.json();
+      currentSha = json.sha;
+      const content = decodeURIComponent(escape(atob(json.content)));
+      const parsed = JSON.parse(content);
+      vendas = parsed.vendas || [];
+      statusEl.textContent = 'sincronizado ✓';
+    } else {
+      statusEl.textContent = 'erro ao carregar (' + res.status + ')';
+    }
+  }catch(e){
+    statusEl.textContent = 'erro: ' + e.message;
+  }
+  renderAll();
+}
+
+async function saveToGitHub(){
+  if(!configIsValid()){
+    alert('Configure a conexão com o GitHub antes de salvar (aba Configurações).');
+    return;
+  }
+  const statusEl = document.getElementById('syncStatus');
+  statusEl.textContent = 'salvando...';
+  try{
+    // sempre busca o SHA mais recente antes de salvar, para evitar conflito 409
+    const getRes = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${DATA_FILE}`, {
+      headers:{Authorization:`token ${config.token}`}
+    });
+    let sha = undefined;
+    if(getRes.ok){
+      const json = await getRes.json();
+      sha = json.sha;
+    }
+    const payload = { vendas };
+    const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const body = {
+      message: 'Atualiza data.json — ' + new Date().toISOString(),
+      content: contentEncoded
+    };
+    if(sha) body.sha = sha;
+
+    const putRes = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${DATA_FILE}`, {
+      method:'PUT',
+      headers:{
+        Authorization:`token ${config.token}`,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if(putRes.ok){
+      const json = await putRes.json();
+      currentSha = json.content.sha;
+      statusEl.textContent = 'sincronizado ✓';
+    } else {
+      const errText = await putRes.text();
+      statusEl.textContent = 'erro ao salvar (' + putRes.status + ')';
+      console.error(errText);
+    }
+  }catch(e){
+    statusEl.textContent = 'erro: ' + e.message;
+  }
+}
+
+// ============ VENDAS: CRUD ============
+document.getElementById('formVenda').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const venda = {
+    id: Date.now().toString(36),
+    data: document.getElementById('fData').value,
+    vendedor: document.getElementById('fVendedor').value.trim(),
+    produto: document.getElementById('fProduto').value.trim(),
+    pagamento: document.getElementById('fPagamento').value,
+    valor: parseFloat(document.getElementById('fValor').value || '0')
+  };
+  vendas.push(venda);
+  e.target.reset();
+  renderAll();
+  saveToGitHub();
+});
+
+function deleteVenda(id){
+  if(!confirm('Remover esta venda?')) return;
+  vendas = vendas.filter(v=>v.id !== id);
+  renderAll();
+  saveToGitHub();
+}
+
+// ============ RENDER ============
+function fmtMoeda(v){
+  return (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+
+function renderTabelaVendas(){
+  const tbody = document.getElementById('tbodyVendas');
+  const empty = document.getElementById('emptyVendas');
+  const ordenadas = [...vendas].sort((a,b)=> (b.data||'').localeCompare(a.data||''));
+  tbody.innerHTML = '';
+  if(ordenadas.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  ordenadas.forEach(v=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+      <td>${v.vendedor || '-'}</td>
+      <td>${v.produto || '-'}</td>
+      <td>${v.pagamento || '-'}</td>
+      <td class="num">${fmtMoeda(v.valor)}</td>
+      <td><button class="del-btn" onclick="deleteVenda('${v.id}')">remover</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderKPIs(){
+  const total = vendas.reduce((s,v)=> s + (v.valor||0), 0);
+  const qtd = vendas.length;
+  const ticket = qtd > 0 ? total / qtd : 0;
+
+  document.getElementById('kpiTotal').textContent = fmtMoeda(total);
+  document.getElementById('kpiQtd').textContent = qtd;
+  document.getElementById('kpiTicket').textContent = fmtMoeda(ticket);
+
+  const porVendedor = {};
+  vendas.forEach(v=>{
+    const nome = v.vendedor || 'Sem nome';
+    porVendedor[nome] = (porVendedor[nome]||0) + (v.valor||0);
+  });
+  let top = '-';
+  let topVal = -1;
+  Object.entries(porVendedor).forEach(([nome,val])=>{
+    if(val > topVal){ topVal = val; top = nome; }
+  });
+  document.getElementById('kpiTop').textContent = top;
+}
+
+let chartDia, chartVendedor;
+function renderCharts(){
+  const porDia = {};
+  vendas.forEach(v=>{
+    const d = v.data || 'sem data';
+    porDia[d] = (porDia[d]||0) + (v.valor||0);
+  });
+  const diasOrdenados = Object.keys(porDia).sort();
+
+  const ctxDia = document.getElementById('chartVendasDia');
+  if(chartDia) chartDia.destroy();
+  chartDia = new Chart(ctxDia, {
+    type: 'line',
+    data: {
+      labels: diasOrdenados.map(d => d==='sem data' ? d : new Date(d+'T00:00:00').toLocaleDateString('pt-BR')),
+      datasets: [{
+        label: 'Vendas (R$)',
+        data: diasOrdenados.map(d => porDia[d]),
+        borderColor: '#2f6fed',
+        backgroundColor: 'rgba(47,111,237,0.1)',
+        fill: true,
+        tension: 0.25
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}} }
+  });
+
+  const porVendedor = {};
+  vendas.forEach(v=>{
+    const nome = v.vendedor || 'Sem nome';
+    porVendedor[nome] = (porVendedor[nome]||0) + (v.valor||0);
+  });
+  const nomes = Object.keys(porVendedor);
+
+  const ctxV = document.getElementById('chartVendedor');
+  if(chartVendedor) chartVendedor.destroy();
+  chartVendedor = new Chart(ctxV, {
+    type: 'bar',
+    data: {
+      labels: nomes,
+      datasets: [{
+        label: 'Vendas (R$)',
+        data: nomes.map(n => porVendedor[n]),
+        backgroundColor: '#2f6fed'
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}} }
+  });
+}
+
+function renderAll(){
+  renderTabelaVendas();
+  renderKPIs();
+  renderCharts();
+}
+
+// ============ INIT ============
+loadConfigToUI();
+loadFromGitHub();
+</script>
+
+</body>
+</html>
