@@ -1,5 +1,21 @@
 {
   "vendas": [],
-  "custos": [],
+  "custos": [
+    {
+      "id": "mrp8sf5w",
+      "codigo": "MKYNOS",
+      "nome": "Conjunto Preto Mykonos",
+      "qtdLinhas": 6,
+      "custoLinha": 31.2,
+      "totalLinhas": 187.2,
+      "qtdHoras": 0,
+      "custoHora": 0,
+      "totalHoras": 0,
+      "maoObraTerceira": 290,
+      "frete": 46.61,
+      "custoTotal": 523.81,
+      "status": "Em Estoque"
+    }
+  ],
   "precificacoes": []
 }
