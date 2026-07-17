@@ -1,20 +1,6 @@
 {
   "vendas": [
     {
-      "id": "mrpaqcpg-1",
-      "data": "2026-07-17",
-      "vencimento": "2026-07-17",
-      "vendedor": "MARI",
-      "produtoId": "mrp8sf5w",
-      "produto": "MKYNOS — Conjunto Preto Mykonos",
-      "pagamento": "Parcelado (1/2)",
-      "custoTotal": 261.905,
-      "precoVenda": 1390,
-      "desconto": 0,
-      "valor": 695,
-      "margem": 62.3158273381295
-    },
-    {
       "id": "mrpaqcpg-2",
       "data": "2026-07-17",
       "vencimento": "2026-07-31",
@@ -43,7 +29,7 @@
       "maoObraTerceira": 290,
       "frete": 46.61,
       "custoTotal": 523.81,
-      "status": "Vendido"
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
@@ -58,5 +44,6 @@
       "precoAjustado": 1390,
       "margemAtualizada": 62.3158273381295
     }
-  ]
+  ],
+  "fluxoCaixa": []
 }
