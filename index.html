@@ -193,6 +193,8 @@
 <nav>
   <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
   <button class="tab-btn" data-tab="lancamento">Lançamento de Vendas</button>
+  <button class="tab-btn" data-tab="custos">Lançamento de Custos</button>
+  <button class="tab-btn" data-tab="precificacao">Precificação</button>
 </nav>
 
 <main>
@@ -264,6 +266,136 @@
     </div>
   </section>
 
+  <!-- LANÇAMENTO DE CUSTOS -->
+  <section id="custos" class="tab">
+    <div class="card">
+      <h2>Novo custo de peça</h2>
+      <form class="entry" id="formCusto">
+        <div>
+          <label>Código do Produto</label>
+          <input type="text" id="cCodigo" placeholder="Ex: MC-001" required>
+        </div>
+        <div>
+          <label>Nome do Produto</label>
+          <input type="text" id="cNome" placeholder="Ex: Bolsa Crochê" required>
+        </div>
+        <div>
+          <label>Quantidade de Linhas</label>
+          <input type="number" id="cQtdLinhas" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Custo das Linhas (R$/unid.)</label>
+          <input type="number" id="cCustoLinha" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Total Gasto (Linhas)</label>
+          <input type="text" id="cTotalLinhas" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Quantidade de Horas</label>
+          <input type="number" id="cQtdHoras" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Custo da Hora (R$)</label>
+          <input type="number" id="cCustoHora" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Total Gasto (Horas)</label>
+          <input type="text" id="cTotalHoras" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Mão de Obra Terceira (R$)</label>
+          <input type="number" id="cMaoObraTerceira" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Custo Total da Peça</label>
+          <input type="text" id="cCustoTotal" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <button type="submit" class="primary">Adicionar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Custos lançados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Produto</th>
+            <th style="text-align:right">Total Linhas</th>
+            <th style="text-align:right">Total Horas</th>
+            <th style="text-align:right">Mão Obra 3ª</th>
+            <th style="text-align:right">Custo Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyCustos"></tbody>
+      </table>
+      <div class="empty" id="emptyCustos" style="display:none">Nenhum custo lançado ainda.</div>
+    </div>
+  </section>
+
+  <!-- PRECIFICAÇÃO -->
+  <section id="precificacao" class="tab">
+    <div class="card">
+      <h2>Calcular preço</h2>
+      <form class="entry" id="formPrecificacao">
+        <div>
+          <label>Produto</label>
+          <select id="pProduto" required>
+            <option value="">Selecione um produto</option>
+          </select>
+        </div>
+        <div>
+          <label>Custo Total da Peça</label>
+          <input type="text" id="pCustoTotal" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Margem de Lucro Desejada (%)</label>
+          <input type="number" id="pMargemDesejada" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Preço Sugerido</label>
+          <input type="text" id="pPrecoSugerido" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Preço de Venda (ajuste)</label>
+          <input type="number" id="pPrecoAjustado" step="0.01" min="0" placeholder="0,00">
+        </div>
+        <div>
+          <label>Margem de Lucro Atualizada</label>
+          <input type="text" id="pMargemAtualizada" value="0,00%" disabled>
+        </div>
+        <div>
+          <button type="submit" class="primary">Salvar precificação</button>
+        </div>
+      </form>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:10px">
+        Fórmula: preço sugerido = custo total ÷ (1 − margem desejada). A margem atualizada é recalculada com base no preço de venda ajustado.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Preços salvos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th style="text-align:right">Custo Total</th>
+            <th style="text-align:right">Margem Desejada</th>
+            <th style="text-align:right">Preço Sugerido</th>
+            <th style="text-align:right">Preço Ajustado</th>
+            <th style="text-align:right">Margem Atualizada</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyPrecificacao"></tbody>
+      </table>
+      <div class="empty" id="emptyPrecificacao" style="display:none">Nenhuma precificação salva ainda.</div>
+    </div>
+  </section>
+
 </main>
 
 <script>
@@ -282,6 +414,8 @@ const config = {
 };
 
 let vendas = [];
+let custos = [];
+let precificacoes = [];
 let currentSha = null;
 
 // ============ TABS ============
@@ -304,6 +438,8 @@ async function loadFromGitHub(){
     });
     if(res.status === 404){
       vendas = [];
+      custos = [];
+      precificacoes = [];
       currentSha = null;
       statusEl.textContent = 'nenhum dado ainda (novo arquivo será criado ao salvar)';
     } else if(res.ok){
@@ -312,6 +448,8 @@ async function loadFromGitHub(){
       const content = decodeURIComponent(escape(atob(json.content)));
       const parsed = JSON.parse(content);
       vendas = parsed.vendas || [];
+      custos = parsed.custos || [];
+      precificacoes = parsed.precificacoes || [];
       statusEl.textContent = 'sincronizado ✓';
     } else {
       statusEl.textContent = 'erro ao carregar (' + res.status + ')';
@@ -335,7 +473,7 @@ async function saveToGitHub(){
       const json = await getRes.json();
       sha = json.sha;
     }
-    const payload = { vendas };
+    const payload = { vendas, custos, precificacoes };
     const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
     const body = {
       message: 'Atualiza data.json — ' + new Date().toISOString(),
@@ -385,6 +523,162 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
 function deleteVenda(id){
   if(!confirm('Remover esta venda?')) return;
   vendas = vendas.filter(v=>v.id !== id);
+  renderAll();
+  saveToGitHub();
+}
+
+// ============ CUSTOS: cálculo automático em tempo real ============
+function recalcCustoForm(){
+  const qtdLinhas = parseFloat(document.getElementById('cQtdLinhas').value || '0');
+  const custoLinha = parseFloat(document.getElementById('cCustoLinha').value || '0');
+  const qtdHoras = parseFloat(document.getElementById('cQtdHoras').value || '0');
+  const custoHora = parseFloat(document.getElementById('cCustoHora').value || '0');
+  const maoObraTerceira = parseFloat(document.getElementById('cMaoObraTerceira').value || '0');
+
+  const totalLinhas = qtdLinhas * custoLinha;
+  const totalHoras = qtdHoras * custoHora;
+  const custoTotal = totalLinhas + totalHoras + maoObraTerceira;
+
+  document.getElementById('cTotalLinhas').value = fmtMoeda(totalLinhas);
+  document.getElementById('cTotalHoras').value = fmtMoeda(totalHoras);
+  document.getElementById('cCustoTotal').value = fmtMoeda(custoTotal);
+}
+['cQtdLinhas','cCustoLinha','cQtdHoras','cCustoHora','cMaoObraTerceira'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', recalcCustoForm);
+});
+
+// ============ CUSTOS: CRUD ============
+document.getElementById('formCusto').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const qtdLinhas = parseFloat(document.getElementById('cQtdLinhas').value || '0');
+  const custoLinha = parseFloat(document.getElementById('cCustoLinha').value || '0');
+  const qtdHoras = parseFloat(document.getElementById('cQtdHoras').value || '0');
+  const custoHora = parseFloat(document.getElementById('cCustoHora').value || '0');
+  const maoObraTerceira = parseFloat(document.getElementById('cMaoObraTerceira').value || '0');
+  const totalLinhas = qtdLinhas * custoLinha;
+  const totalHoras = qtdHoras * custoHora;
+  const custoTotal = totalLinhas + totalHoras + maoObraTerceira;
+
+  const custo = {
+    id: Date.now().toString(36),
+    codigo: document.getElementById('cCodigo').value.trim(),
+    nome: document.getElementById('cNome').value.trim(),
+    qtdLinhas, custoLinha, totalLinhas,
+    qtdHoras, custoHora, totalHoras,
+    maoObraTerceira,
+    custoTotal
+  };
+  custos.push(custo);
+  e.target.reset();
+  recalcCustoForm();
+  renderAll();
+  saveToGitHub();
+});
+
+function deleteCusto(id){
+  if(!confirm('Remover este custo?')) return;
+  custos = custos.filter(c=>c.id !== id);
+  renderAll();
+  saveToGitHub();
+}
+
+// ============ PRECIFICAÇÃO: dropdown e cálculo automático ============
+function popularDropdownProdutos(){
+  const select = document.getElementById('pProduto');
+  const valorAtual = select.value;
+  select.innerHTML = '<option value="">Selecione um produto</option>';
+  custos.forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.codigo ? c.codigo + ' — ' : ''}${c.nome}`;
+    select.appendChild(opt);
+  });
+  if(custos.some(c=>c.id === valorAtual)) select.value = valorAtual;
+}
+
+function recalcPrecificacaoForm(){
+  const produtoId = document.getElementById('pProduto').value;
+  const custo = custos.find(c=>c.id === produtoId);
+  const custoTotal = custo ? custo.custoTotal : 0;
+  document.getElementById('pCustoTotal').value = fmtMoeda(custoTotal);
+
+  const margemDesejada = parseFloat(document.getElementById('pMargemDesejada').value || '0');
+  let precoSugerido = 0;
+  if(margemDesejada < 100){
+    precoSugerido = custoTotal / (1 - (margemDesejada/100));
+  }
+  document.getElementById('pPrecoSugerido').value = fmtMoeda(precoSugerido);
+
+  // se o campo de ajuste ainda não foi mexido manualmente pelo usuário nesta sessão, sugere o valor calculado
+  const ajusteInput = document.getElementById('pPrecoAjustado');
+  if(!ajusteInput.dataset.touched){
+    ajusteInput.value = precoSugerido > 0 ? precoSugerido.toFixed(2) : '';
+  }
+  recalcMargemAtualizada();
+}
+
+function recalcMargemAtualizada(){
+  const produtoId = document.getElementById('pProduto').value;
+  const custo = custos.find(c=>c.id === produtoId);
+  const custoTotal = custo ? custo.custoTotal : 0;
+  const precoAjustado = parseFloat(document.getElementById('pPrecoAjustado').value || '0');
+  let margemAtualizada = 0;
+  if(precoAjustado > 0){
+    margemAtualizada = ((precoAjustado - custoTotal) / precoAjustado) * 100;
+  }
+  document.getElementById('pMargemAtualizada').value = margemAtualizada.toFixed(2).replace('.',',') + '%';
+}
+
+document.getElementById('pProduto').addEventListener('change', ()=>{
+  document.getElementById('pPrecoAjustado').dataset.touched = '';
+  recalcPrecificacaoForm();
+});
+document.getElementById('pMargemDesejada').addEventListener('input', recalcPrecificacaoForm);
+document.getElementById('pPrecoAjustado').addEventListener('input', (e)=>{
+  e.target.dataset.touched = '1';
+  recalcMargemAtualizada();
+});
+
+// ============ PRECIFICAÇÃO: CRUD ============
+document.getElementById('formPrecificacao').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const produtoId = document.getElementById('pProduto').value;
+  const custo = custos.find(c=>c.id === produtoId);
+  if(!custo){ alert('Selecione um produto válido.'); return; }
+
+  const custoTotal = custo.custoTotal;
+  const margemDesejada = parseFloat(document.getElementById('pMargemDesejada').value || '0');
+  const precoSugerido = margemDesejada < 100 ? custoTotal / (1 - (margemDesejada/100)) : 0;
+  const precoAjustado = parseFloat(document.getElementById('pPrecoAjustado').value || '0');
+  const margemAtualizada = precoAjustado > 0 ? ((precoAjustado - custoTotal) / precoAjustado) * 100 : 0;
+
+  const registro = {
+    id: Date.now().toString(36),
+    produtoId,
+    produtoNome: custo.nome,
+    produtoCodigo: custo.codigo,
+    custoTotal,
+    margemDesejada,
+    precoSugerido,
+    precoAjustado,
+    margemAtualizada
+  };
+
+  // se já existe precificação para esse produto, atualiza; senão, adiciona
+  const idx = precificacoes.findIndex(p=>p.produtoId === produtoId);
+  if(idx >= 0) precificacoes[idx] = registro;
+  else precificacoes.push(registro);
+
+  e.target.reset();
+  document.getElementById('pPrecoAjustado').dataset.touched = '';
+  recalcPrecificacaoForm();
+  renderAll();
+  saveToGitHub();
+});
+
+function deletePrecificacao(id){
+  if(!confirm('Remover esta precificação?')) return;
+  precificacoes = precificacoes.filter(p=>p.id !== id);
   renderAll();
   saveToGitHub();
 }
@@ -506,13 +800,65 @@ function renderCharts(){
   });
 }
 
+function renderTabelaCustos(){
+  const tbody = document.getElementById('tbodyCustos');
+  const empty = document.getElementById('emptyCustos');
+  tbody.innerHTML = '';
+  if(custos.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  custos.forEach(c=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.codigo || '-'}</td>
+      <td>${c.nome || '-'}</td>
+      <td class="num">${fmtMoeda(c.totalLinhas)}</td>
+      <td class="num">${fmtMoeda(c.totalHoras)}</td>
+      <td class="num">${fmtMoeda(c.maoObraTerceira)}</td>
+      <td class="num">${fmtMoeda(c.custoTotal)}</td>
+      <td><button class="del-btn" onclick="deleteCusto('${c.id}')">remover</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderTabelaPrecificacao(){
+  const tbody = document.getElementById('tbodyPrecificacao');
+  const empty = document.getElementById('emptyPrecificacao');
+  tbody.innerHTML = '';
+  if(precificacoes.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  precificacoes.forEach(p=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.produtoCodigo ? p.produtoCodigo + ' — ' : ''}${p.produtoNome || '-'}</td>
+      <td class="num">${fmtMoeda(p.custoTotal)}</td>
+      <td class="num">${(p.margemDesejada||0).toFixed(2).replace('.',',')}%</td>
+      <td class="num">${fmtMoeda(p.precoSugerido)}</td>
+      <td class="num">${fmtMoeda(p.precoAjustado)}</td>
+      <td class="num">${(p.margemAtualizada||0).toFixed(2).replace('.',',')}%</td>
+      <td><button class="del-btn" onclick="deletePrecificacao('${p.id}')">remover</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function renderAll(){
   renderTabelaVendas();
   renderKPIs();
   renderCharts();
+  renderTabelaCustos();
+  popularDropdownProdutos();
+  renderTabelaPrecificacao();
 }
 
 // ============ INIT ============
+recalcCustoForm();
 loadFromGitHub();
 </script>
 
