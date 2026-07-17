@@ -295,9 +295,15 @@
             <option>Cartão</option>
             <option>Dinheiro</option>
             <option>Boleto</option>
+            <option>Parcelado</option>
             <option>Outro</option>
           </select>
         </div>
+        <div id="parcelasContainer" style="display:none;">
+          <label>Número de Parcelas</label>
+          <input type="number" id="fNumParcelas" min="1" step="1" value="2">
+        </div>
+        <div id="vencimentosContainer" style="display:none;grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;"></div>
         <div>
           <button type="submit" class="primary">Adicionar</button>
         </div>
@@ -310,6 +316,7 @@
         <thead>
           <tr>
             <th>Data</th><th>Vendedor</th><th>Produto</th><th>Pagamento</th>
+            <th>Vencimento</th>
             <th style="text-align:right">Desconto</th>
             <th style="text-align:right">Valor</th>
             <th style="text-align:right">Margem</th>
@@ -629,6 +636,31 @@ function recalcVendaForm(){
 document.getElementById('fProduto').addEventListener('change', recalcVendaForm);
 document.getElementById('fDesconto').addEventListener('input', recalcVendaForm);
 
+// ============ VENDAS: parcelamento ============
+function toggleParcelasUI(){
+  const parcelado = document.getElementById('fPagamento').value === 'Parcelado';
+  document.getElementById('parcelasContainer').style.display = parcelado ? 'block' : 'none';
+  document.getElementById('vencimentosContainer').style.display = parcelado ? 'grid' : 'none';
+  if(parcelado) gerarCamposVencimento();
+  else document.getElementById('vencimentosContainer').innerHTML = '';
+}
+function gerarCamposVencimento(){
+  const n = Math.max(parseInt(document.getElementById('fNumParcelas').value || '0', 10), 0);
+  const container = document.getElementById('vencimentosContainer');
+  const valoresAntigos = {};
+  container.querySelectorAll('input[type="date"]').forEach(inp=>{ valoresAntigos[inp.id] = inp.value; });
+  container.innerHTML = '';
+  for(let i=1; i<=n; i++){
+    const div = document.createElement('div');
+    const id = `fVencimento_${i}`;
+    div.innerHTML = `<label>Vencimento da Parcela ${i}</label><input type="date" id="${id}" required>`;
+    container.appendChild(div);
+    if(valoresAntigos[id]) container.querySelector('#'+id).value = valoresAntigos[id];
+  }
+}
+document.getElementById('fPagamento').addEventListener('change', toggleParcelasUI);
+document.getElementById('fNumParcelas').addEventListener('input', gerarCamposVencimento);
+
 // ============ VENDAS: CRUD ============
 document.getElementById('formVenda').addEventListener('submit', (e)=>{
   e.preventDefault();
@@ -643,22 +675,63 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
   const valorFinal = Math.max(precoVenda - desconto, 0);
   const novaMargem = valorFinal > 0 ? ((valorFinal - custoTotal) / valorFinal) * 100 : 0;
 
-  const venda = {
-    id: Date.now().toString(36),
-    data: document.getElementById('fData').value,
-    vendedor: document.getElementById('fVendedor').value.trim(),
-    produtoId,
-    produto: `${custo.codigo ? custo.codigo + ' — ' : ''}${custo.nome}`,
-    pagamento: document.getElementById('fPagamento').value,
-    custoTotal,
-    precoVenda,
-    desconto,
-    valor: valorFinal,
-    margem: novaMargem
-  };
-  vendas.push(venda);
+  const dataVenda = document.getElementById('fData').value;
+  const vendedor = document.getElementById('fVendedor').value.trim();
+  const produtoNome = `${custo.codigo ? custo.codigo + ' — ' : ''}${custo.nome}`;
+  const pagamento = document.getElementById('fPagamento').value;
+
+  if(pagamento === 'Parcelado'){
+    const numParcelas = parseInt(document.getElementById('fNumParcelas').value || '0', 10);
+    if(numParcelas < 1){ alert('Informe um número de parcelas válido.'); return; }
+
+    const vencimentos = [];
+    for(let i=1; i<=numParcelas; i++){
+      const v = document.getElementById(`fVencimento_${i}`).value;
+      if(!v){ alert(`Preencha o vencimento da parcela ${i}.`); return; }
+      vencimentos.push(v);
+    }
+
+    const valorParcela = valorFinal / numParcelas;
+    const custoParcela = custoTotal / numParcelas;
+    const descontoParcela = desconto / numParcelas;
+    const idBase = Date.now().toString(36);
+
+    vencimentos.forEach((venc, idx)=>{
+      vendas.push({
+        id: idBase + '-' + (idx+1),
+        data: dataVenda,
+        vencimento: venc,
+        vendedor,
+        produtoId,
+        produto: produtoNome,
+        pagamento: `Parcelado (${idx+1}/${numParcelas})`,
+        custoTotal: custoParcela,
+        precoVenda,
+        desconto: descontoParcela,
+        valor: valorParcela,
+        margem: novaMargem
+      });
+    });
+  } else {
+    vendas.push({
+      id: Date.now().toString(36),
+      data: dataVenda,
+      vencimento: dataVenda,
+      vendedor,
+      produtoId,
+      produto: produtoNome,
+      pagamento,
+      custoTotal,
+      precoVenda,
+      desconto,
+      valor: valorFinal,
+      margem: novaMargem
+    });
+  }
+
   custo.status = 'Vendido';
   e.target.reset();
+  toggleParcelasUI();
   recalcVendaForm();
   renderAll();
   saveToGitHub();
@@ -667,11 +740,14 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
 function deleteVenda(id){
   if(!confirm('Remover esta venda?')) return;
   const venda = vendas.find(v=>v.id === id);
-  if(venda && venda.produtoId){
-    const custo = custos.find(c=>c.id === venda.produtoId);
-    if(custo) custo.status = 'Em Estoque';
-  }
   vendas = vendas.filter(v=>v.id !== id);
+  if(venda && venda.produtoId){
+    const aindaTemOutras = vendas.some(v=>v.produtoId === venda.produtoId);
+    if(!aindaTemOutras){
+      const custo = custos.find(c=>c.id === venda.produtoId);
+      if(custo) custo.status = 'Em Estoque';
+    }
+  }
   renderAll();
   saveToGitHub();
 }
@@ -867,6 +943,7 @@ function renderTabelaVendas(){
       <td>${v.vendedor || '-'}</td>
       <td>${v.produto || '-'}</td>
       <td>${v.pagamento || '-'}</td>
+      <td>${v.vencimento ? new Date(v.vencimento+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
       <td class="num">${fmtMoeda(v.desconto)}</td>
       <td class="num">${fmtMoeda(v.valor)}</td>
       <td class="num">${(v.margem||0).toFixed(2).replace('.',',')}%</td>
@@ -1094,6 +1171,7 @@ function renderAll(){
 // ============ INIT ============
 recalcCustoForm();
 recalcVendaForm();
+toggleParcelasUI();
 loadFromGitHub();
 </script>
 
