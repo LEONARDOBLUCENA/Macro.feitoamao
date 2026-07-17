@@ -3,64 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Macro | BI de Vendas</title>
+<title>Macrô | BI de Vendas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#f5f6f8;
+    /* paleta — Manual de Marca Macrô 2026 */
+    --marrom:#463730;      /* cor principal / textos de destaque */
+    --marrom-escuro:#332822;
+    --areia:#d0c3b4;       /* bege claro */
+    --rose:#D1BAA6;        /* rosé claro */
+    --mauve:#a2968c;       /* neutro médio, usado como texto secundário */
+    --preto:#262626;
+    --off-white:#faf8f4;   /* fundo geral */
+
+    --bg:var(--off-white);
     --card:#ffffff;
-    --border:#e2e5ea;
-    --text:#1c2230;
-    --text-muted:#6b7280;
-    --primary:#2f6fed;
-    --primary-dark:#1f4fc4;
-    --green:#1a9c5a;
-    --red:#d64545;
+    --border:#e4dcd2;
+    --text:var(--preto);
+    --text-muted:var(--mauve);
+    --primary:var(--marrom);
+    --primary-dark:var(--marrom-escuro);
+    --green:#5f7a5a;
+    --red:#a4453a;
     --radius:10px;
+
+    --font-display:'Cormorant Garamond', Georgia, serif;
+    --font-body:'Montserrat', -apple-system, sans-serif;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    font-family:var(--font-body);
     background:var(--bg);
     color:var(--text);
   }
   header{
-    background:var(--card);
-    border-bottom:1px solid var(--border);
-    padding:14px 24px;
+    background:var(--marrom);
+    padding:22px 28px 18px;
     display:flex;
-    align-items:center;
+    align-items:flex-end;
     justify-content:space-between;
     position:sticky;
     top:0;
     z-index:10;
   }
-  header h1{
-    font-size:18px;
+  .logo-block h1{
+    font-family:var(--font-display);
+    font-size:34px;
     margin:0;
-    font-weight:700;
-    letter-spacing:.2px;
+    font-weight:500;
+    letter-spacing:1px;
+    color:var(--rose);
+    text-transform:uppercase;
   }
-  header h1 span{color:var(--primary);}
+  .logo-block .tagline{
+    font-family:var(--font-body);
+    font-size:10px;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--areia);
+    margin-top:2px;
+  }
   #syncStatus{
-    font-size:12px;
-    color:var(--text-muted);
+    font-size:11px;
+    letter-spacing:.4px;
+    color:var(--areia);
+    padding-bottom:4px;
   }
   nav{
     display:flex;
     gap:4px;
     background:var(--card);
     border-bottom:1px solid var(--border);
-    padding:0 24px;
+    padding:0 28px;
     overflow-x:auto;
   }
   nav button{
     border:none;
     background:none;
-    padding:12px 16px;
-    font-size:14px;
+    padding:14px 18px;
+    font-family:var(--font-body);
+    font-size:12px;
     font-weight:600;
+    letter-spacing:.6px;
+    text-transform:uppercase;
     color:var(--text-muted);
     cursor:pointer;
     border-bottom:2px solid transparent;
@@ -71,7 +100,7 @@
     border-bottom:2px solid var(--primary);
   }
   main{
-    padding:24px;
+    padding:28px;
     max-width:1200px;
     margin:0 auto;
   }
@@ -87,41 +116,46 @@
     background:var(--card);
     border:1px solid var(--border);
     border-radius:var(--radius);
-    padding:16px 18px;
+    padding:18px 20px;
   }
-  .kpi .label{font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
-  .kpi .value{font-size:24px;font-weight:700;margin-top:6px;}
+  .kpi .label{font-family:var(--font-body);font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;}
+  .kpi .value{font-family:var(--font-display);font-size:30px;font-weight:500;margin-top:6px;color:var(--marrom);}
   .card{
     background:var(--card);
     border:1px solid var(--border);
     border-radius:var(--radius);
-    padding:18px;
+    padding:20px;
     margin-bottom:20px;
   }
-  .card h2{font-size:15px;margin:0 0 14px 0;}
+  .card h2{font-family:var(--font-display);font-size:19px;font-weight:500;margin:0 0 16px 0;color:var(--marrom);}
   form.entry{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
     gap:12px;
     align-items:end;
   }
-  label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;}
+  label{font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:5px;}
   input,select{
     width:100%;
     padding:9px 10px;
     border:1px solid var(--border);
     border-radius:6px;
     font-size:14px;
+    font-family:var(--font-body);
     background:#fff;
+    color:var(--text);
   }
   button.primary{
     background:var(--primary);
-    color:#fff;
+    color:var(--off-white);
     border:none;
-    padding:10px 16px;
+    padding:10px 18px;
     border-radius:6px;
-    font-size:14px;
+    font-family:var(--font-body);
+    font-size:12px;
     font-weight:600;
+    letter-spacing:.5px;
+    text-transform:uppercase;
     cursor:pointer;
   }
   button.primary:hover{background:var(--primary-dark);}
@@ -131,25 +165,28 @@
     border:1px solid var(--border);
     padding:9px 14px;
     border-radius:6px;
-    font-size:13px;
+    font-family:var(--font-body);
+    font-size:12px;
     cursor:pointer;
   }
   table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);}
-  th{color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;}
+  th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--text-muted);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;}
   td.num{text-align:right;font-variant-numeric:tabular-nums;}
-  .del-btn{color:var(--red);cursor:pointer;font-size:12px;font-weight:600;background:none;border:none;}
+  .del-btn{color:var(--red);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;background:none;border:none;font-family:var(--font-body);}
   .empty{color:var(--text-muted);font-size:13px;padding:20px 0;text-align:center;}
-  .config-grid{display:grid;grid-template-columns:1fr;gap:12px;max-width:420px;}
   .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
-  .badge.ok{background:#e5f7ec;color:var(--green);}
-  .badge.pending{background:#fdeeee;color:var(--red);}
+  .badge.ok{background:#eaf0e8;color:var(--green);}
+  .badge.pending{background:#f5e8e6;color:var(--red);}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Macro <span>| BI de Vendas</span></h1>
+  <div class="logo-block">
+    <h1>Macrô</h1>
+    <div class="tagline">Feito com amor e história</div>
+  </div>
   <div id="syncStatus">carregando...</div>
 </header>
 
@@ -421,13 +458,21 @@ function renderCharts(){
       datasets: [{
         label: 'Vendas (R$)',
         data: diasOrdenados.map(d => porDia[d]),
-        borderColor: '#2f6fed',
-        backgroundColor: 'rgba(47,111,237,0.1)',
+        borderColor: '#463730',
+        backgroundColor: 'rgba(70,55,48,0.12)',
+        pointBackgroundColor: '#463730',
         fill: true,
         tension: 0.25
       }]
     },
-    options: { responsive:true, plugins:{legend:{display:false}} }
+    options: {
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{font:{family:'Montserrat',size:11}},grid:{color:'#e4dcd2'}},
+        y:{ticks:{font:{family:'Montserrat',size:11}},grid:{color:'#e4dcd2'}}
+      }
+    }
   });
 
   const porVendedor = {};
@@ -446,10 +491,18 @@ function renderCharts(){
       datasets: [{
         label: 'Vendas (R$)',
         data: nomes.map(n => porVendedor[n]),
-        backgroundColor: '#2f6fed'
+        backgroundColor: ['#463730','#a2968c','#D1BAA6','#d0c3b4','#262626'],
+        borderRadius:4
       }]
     },
-    options: { responsive:true, plugins:{legend:{display:false}} }
+    options: {
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{font:{family:'Montserrat',size:11}},grid:{display:false}},
+        y:{ticks:{font:{family:'Montserrat',size:11}},grid:{color:'#e4dcd2'}}
+      }
+    }
   });
 }
 
