@@ -89,7 +89,8 @@
       "valor": 150,
       "formaPagamento": "Pix",
       "vencimento": "2026-07-17",
-      "origem": "manual"
+      "origem": "manual",
+      "pago": true
     }
   ]
 }
