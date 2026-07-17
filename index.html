@@ -572,6 +572,18 @@
     </div>
 
     <div class="card">
+      <h2>Resumo Mensal <span style="font-size:12px;color:var(--text-muted);font-weight:400;text-transform:none;">— ano selecionado no filtro acima (ou ano atual, se "Todos")</span></h2>
+      <div style="overflow-x:auto;">
+        <table id="tabelaResumoMensal" style="min-width:900px;">
+          <thead>
+            <tr id="theadResumoMensal"></tr>
+          </thead>
+          <tbody id="tbodyResumoMensal"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Lançamentos</h2>
       <table>
         <thead>
@@ -1413,8 +1425,53 @@ function togglePagoFluxoCaixa(id, checked){
   saveToGitHub();
 }
 
+function renderResumoMensalFluxoCaixa(){
+  const nomesMeses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const anoFiltro = document.getElementById('fcFiltroAno').value;
+  const ano = anoFiltro || new Date().getFullYear().toString();
+  const status = document.getElementById('fcFiltroStatus').value;
+
+  const base = fluxoCaixa.filter(f=>{
+    if(!f.vencimento || f.vencimento.slice(0,4) !== ano) return false;
+    if(status === 'pago' && !f.pago) return false;
+    if(status === 'previsto' && f.pago) return false;
+    return true;
+  });
+
+  const faturamentoPorMes = new Array(12).fill(0);
+  const despesaPorMes = new Array(12).fill(0);
+  base.forEach(f=>{
+    const mesIdx = parseInt(f.vencimento.slice(5,7), 10) - 1;
+    if(mesIdx < 0 || mesIdx > 11) return;
+    if(f.tipo === 'Entrada') faturamentoPorMes[mesIdx] += (f.valor||0);
+    else despesaPorMes[mesIdx] += (f.valor||0);
+  });
+  const saldoPorMes = faturamentoPorMes.map((f,i) => f - despesaPorMes[i]);
+
+  const totalFaturamento = faturamentoPorMes.reduce((a,b)=>a+b, 0);
+  const totalDespesa = despesaPorMes.reduce((a,b)=>a+b, 0);
+  const totalSaldo = totalFaturamento - totalDespesa;
+
+  const thead = document.getElementById('theadResumoMensal');
+  thead.innerHTML = '<th></th>' + nomesMeses.map(m=>`<th style="text-align:right">${m}/${ano.slice(2)}</th>`).join('') + '<th style="text-align:right">Total</th>';
+
+  const tbody = document.getElementById('tbodyResumoMensal');
+  const linha = (label, valores, total, cor) => `
+    <tr>
+      <td style="font-weight:600;">${label}</td>
+      ${valores.map(v=>`<td class="num" style="color:${cor};">${fmtMoeda(v)}</td>`).join('')}
+      <td class="num" style="font-weight:700;color:${cor};">${fmtMoeda(total)}</td>
+    </tr>
+  `;
+  tbody.innerHTML =
+    linha('Faturamento', faturamentoPorMes, totalFaturamento, 'var(--green)') +
+    linha('Despesa', despesaPorMes, totalDespesa, 'var(--red)') +
+    linha('Saldo Mensal', saldoPorMes, totalSaldo, 'var(--marrom)');
+}
+
 function renderFluxoCaixa(){
   popularFiltroAnoFC();
+  renderResumoMensalFluxoCaixa();
   const tbody = document.getElementById('tbodyFluxoCaixa');
   const empty = document.getElementById('emptyFluxoCaixa');
   tbody.innerHTML = '';
