@@ -490,12 +490,6 @@
 
   <!-- FLUXO DE CAIXA -->
   <section id="fluxocaixa" class="tab">
-    <div class="kpis">
-      <div class="kpi"><div class="label">Total Entradas</div><div class="value" id="kpiFcEntradas">R$ 0,00</div></div>
-      <div class="kpi"><div class="label">Total Saídas</div><div class="value" id="kpiFcSaidas">R$ 0,00</div></div>
-      <div class="kpi"><div class="label">Saldo</div><div class="value" id="kpiFcSaldo">R$ 0,00</div></div>
-    </div>
-
     <div class="card">
       <h2>Novo custo / despesa</h2>
       <form class="entry" id="formFluxoCaixa">
@@ -534,6 +528,50 @@
     </div>
 
     <div class="card">
+      <h2>Filtro</h2>
+      <div class="entry" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,200px));gap:12px;">
+        <div>
+          <label>Ano</label>
+          <select id="fcFiltroAno"><option value="">Todos</option></select>
+        </div>
+        <div>
+          <label>Mês</label>
+          <select id="fcFiltroMes">
+            <option value="">Todos</option>
+            <option value="01">Janeiro</option>
+            <option value="02">Fevereiro</option>
+            <option value="03">Março</option>
+            <option value="04">Abril</option>
+            <option value="05">Maio</option>
+            <option value="06">Junho</option>
+            <option value="07">Julho</option>
+            <option value="08">Agosto</option>
+            <option value="09">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="fcFiltroTipo">
+            <option value="">Todos</option>
+            <option value="Entrada">Entrada</option>
+            <option value="Saída">Saída</option>
+          </select>
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="fcFiltroStatus">
+            <option value="">Todos</option>
+            <option value="pago">Pago/Recebido</option>
+            <option value="previsto">Previsto</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Lançamentos</h2>
       <table>
         <thead>
@@ -541,6 +579,7 @@
             <th>Data Emissão</th><th>Descrição</th><th>Tipo</th><th>Origem</th>
             <th>Forma Pagamento</th><th>Vencimento</th>
             <th style="text-align:right">Valor</th>
+            <th style="text-align:center">Pago/Recebido</th>
             <th></th>
           </tr>
         </thead>
@@ -799,7 +838,8 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
         formaPagamento: pagamentoLabel,
         vencimento: p.vencimento,
         origem: 'venda',
-        vendaId
+        vendaId,
+        pago: false
       });
     });
   } else {
@@ -812,7 +852,8 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
       formaPagamento: pagamentoLabel,
       vencimento: dataVenda,
       origem: 'venda',
-      vendaId
+      vendaId,
+      pago: false
     });
   }
 
@@ -1061,7 +1102,8 @@ document.getElementById('formFluxoCaixa').addEventListener('submit', (e)=>{
         valor: valorParcela,
         formaPagamento: pagamentoLabel,
         vencimento: venc,
-        origem: 'manual'
+        origem: 'manual',
+        pago: false
       });
     });
   } else {
@@ -1073,7 +1115,8 @@ document.getElementById('formFluxoCaixa').addEventListener('submit', (e)=>{
       valor,
       formaPagamento: pagamento,
       vencimento: dataEmissao,
-      origem: 'manual'
+      origem: 'manual',
+      pago: false
     });
   }
 
@@ -1089,6 +1132,11 @@ function deleteFluxoCaixa(id){
   renderAll();
   saveToGitHub();
 }
+
+document.getElementById('fcFiltroAno').addEventListener('change', renderFluxoCaixa);
+document.getElementById('fcFiltroMes').addEventListener('change', renderFluxoCaixa);
+document.getElementById('fcFiltroTipo').addEventListener('change', renderFluxoCaixa);
+document.getElementById('fcFiltroStatus').addEventListener('change', renderFluxoCaixa);
 
 // ============ RENDER ============
 function fmtMoeda(v){
@@ -1328,24 +1376,57 @@ function renderEstoque(){
   });
 }
 
+function popularFiltroAnoFC(){
+  const select = document.getElementById('fcFiltroAno');
+  const valorAtual = select.value;
+  const anos = [...new Set(fluxoCaixa.filter(f=>f.vencimento).map(f=>f.vencimento.slice(0,4)))].sort((a,b)=>b.localeCompare(a));
+  select.innerHTML = '<option value="">Todos</option>';
+  anos.forEach(ano=>{
+    const opt = document.createElement('option');
+    opt.value = ano;
+    opt.textContent = ano;
+    select.appendChild(opt);
+  });
+  if(anos.includes(valorAtual)) select.value = valorAtual;
+}
+
+function getFluxoCaixaFiltrado(){
+  const ano = document.getElementById('fcFiltroAno').value;
+  const mes = document.getElementById('fcFiltroMes').value;
+  const tipo = document.getElementById('fcFiltroTipo').value;
+  const status = document.getElementById('fcFiltroStatus').value;
+  return fluxoCaixa.filter(f=>{
+    if(!f.vencimento) return false;
+    if(ano && f.vencimento.slice(0,4) !== ano) return false;
+    if(mes && f.vencimento.slice(5,7) !== mes) return false;
+    if(tipo && f.tipo !== tipo) return false;
+    if(status === 'pago' && !f.pago) return false;
+    if(status === 'previsto' && f.pago) return false;
+    return true;
+  });
+}
+
+function togglePagoFluxoCaixa(id, checked){
+  const f = fluxoCaixa.find(f=>f.id === id);
+  if(!f) return;
+  f.pago = checked;
+  saveToGitHub();
+}
+
 function renderFluxoCaixa(){
+  popularFiltroAnoFC();
   const tbody = document.getElementById('tbodyFluxoCaixa');
   const empty = document.getElementById('emptyFluxoCaixa');
   tbody.innerHTML = '';
 
-  const entradas = fluxoCaixa.filter(f=>f.tipo === 'Entrada').reduce((s,f)=> s + (f.valor||0), 0);
-  const saidas = fluxoCaixa.filter(f=>f.tipo === 'Saída').reduce((s,f)=> s + (f.valor||0), 0);
-  document.getElementById('kpiFcEntradas').textContent = fmtMoeda(entradas);
-  document.getElementById('kpiFcSaidas').textContent = fmtMoeda(saidas);
-  document.getElementById('kpiFcSaldo').textContent = fmtMoeda(entradas - saidas);
-
-  if(fluxoCaixa.length === 0){
+  const filtrados = getFluxoCaixaFiltrado();
+  if(filtrados.length === 0){
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
 
-  const ordenados = [...fluxoCaixa].sort((a,b)=> (b.vencimento||'').localeCompare(a.vencimento||''));
+  const ordenados = [...filtrados].sort((a,b)=> (a.vencimento||'').localeCompare(b.vencimento||''));
   ordenados.forEach(f=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -1356,6 +1437,7 @@ function renderFluxoCaixa(){
       <td>${f.formaPagamento || '-'}</td>
       <td>${f.vencimento ? new Date(f.vencimento+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
       <td class="num" style="color:${f.tipo==='Entrada' ? 'var(--green)' : 'var(--red)'};">${f.tipo==='Saída' ? '-' : ''}${fmtMoeda(f.valor)}</td>
+      <td style="text-align:center"><input type="checkbox" onchange="togglePagoFluxoCaixa('${f.id}', this.checked)" ${f.pago ? 'checked' : ''} style="width:auto;cursor:pointer;"></td>
       <td><button class="del-btn" onclick="deleteFluxoCaixa('${f.id}')">remover</button></td>
     `;
     tbody.appendChild(tr);
