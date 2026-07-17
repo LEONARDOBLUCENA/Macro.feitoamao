@@ -194,6 +194,7 @@
   <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
   <button class="tab-btn" data-tab="lancamento">Lançamento de Vendas</button>
   <button class="tab-btn" data-tab="custos">Lançamento de Custos</button>
+  <button class="tab-btn" data-tab="estoque">Estoque</button>
   <button class="tab-btn" data-tab="precificacao">Precificação</button>
 </nav>
 
@@ -232,7 +233,33 @@
         </div>
         <div>
           <label>Produto / Categoria</label>
-          <input type="text" id="fProduto" placeholder="Ex: Produto A">
+          <select id="fProduto">
+            <option value="">Selecione um produto em estoque</option>
+          </select>
+        </div>
+        <div>
+          <label>Custo do Produto</label>
+          <input type="text" id="fCustoProduto" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Preço de Venda</label>
+          <input type="text" id="fPrecoVenda" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Margem de Lucro</label>
+          <input type="text" id="fMargemOriginal" value="0,00%" disabled>
+        </div>
+        <div>
+          <label>Desconto (R$)</label>
+          <input type="number" id="fDesconto" step="0.01" min="0" value="0">
+        </div>
+        <div>
+          <label>Valor Final de Venda</label>
+          <input type="text" id="fValorFinal" value="R$ 0,00" disabled>
+        </div>
+        <div>
+          <label>Nova Margem (com desconto)</label>
+          <input type="text" id="fNovaMargem" value="0,00%" disabled>
         </div>
         <div>
           <label>Forma de pagamento</label>
@@ -245,10 +272,6 @@
           </select>
         </div>
         <div>
-          <label>Valor (R$)</label>
-          <input type="number" id="fValor" step="0.01" min="0" required>
-        </div>
-        <div>
           <button type="submit" class="primary">Adicionar</button>
         </div>
       </form>
@@ -258,7 +281,13 @@
       <h2>Vendas lançadas</h2>
       <table>
         <thead>
-          <tr><th>Data</th><th>Vendedor</th><th>Produto</th><th>Pagamento</th><th style="text-align:right">Valor</th><th></th></tr>
+          <tr>
+            <th>Data</th><th>Vendedor</th><th>Produto</th><th>Pagamento</th>
+            <th style="text-align:right">Desconto</th>
+            <th style="text-align:right">Valor</th>
+            <th style="text-align:right">Margem</th>
+            <th></th>
+          </tr>
         </thead>
         <tbody id="tbodyVendas"></tbody>
       </table>
@@ -338,6 +367,24 @@
         <tbody id="tbodyCustos"></tbody>
       </table>
       <div class="empty" id="emptyCustos" style="display:none">Nenhum custo lançado ainda.</div>
+    </div>
+  </section>
+
+  <!-- ESTOQUE -->
+  <section id="estoque" class="tab">
+    <div class="card">
+      <h2>Produtos em estoque</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Produto</th>
+            <th style="text-align:right">Custo Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyEstoque"></tbody>
+      </table>
+      <div class="empty" id="emptyEstoque" style="display:none">Nenhum produto no estoque ainda. Lance um custo na aba "Lançamento de Custos" para o produto aparecer aqui.</div>
     </div>
   </section>
 
@@ -508,19 +555,77 @@ async function saveToGitHub(){
   }
 }
 
+// ============ VENDAS: dropdown de produtos em estoque ============
+function popularDropdownProdutosVenda(){
+  const select = document.getElementById('fProduto');
+  const valorAtual = select.value;
+  select.innerHTML = '<option value="">Selecione um produto em estoque</option>';
+  custos.filter(c=>!c.status || c.status === 'Em Estoque').forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.codigo ? c.codigo + ' — ' : ''}${c.nome}`;
+    select.appendChild(opt);
+  });
+  if(custos.some(c=>c.id === valorAtual && (!c.status || c.status === 'Em Estoque'))) select.value = valorAtual;
+}
+
+// ============ VENDAS: cálculo automático (custo, preço, margem, desconto) ============
+function recalcVendaForm(){
+  const produtoId = document.getElementById('fProduto').value;
+  const custo = custos.find(c=>c.id === produtoId);
+  const precificacao = precificacoes.find(p=>p.produtoId === produtoId);
+
+  const custoTotal = custo ? custo.custoTotal : 0;
+  const precoVenda = precificacao ? precificacao.precoAjustado : 0;
+  const margemOriginal = precificacao ? precificacao.margemAtualizada : 0;
+
+  document.getElementById('fCustoProduto').value = custo ? fmtMoeda(custoTotal) : 'R$ 0,00';
+  document.getElementById('fPrecoVenda').value = precificacao ? fmtMoeda(precoVenda) : 'sem precificação';
+  document.getElementById('fMargemOriginal').value = precificacao ? margemOriginal.toFixed(2).replace('.',',') + '%' : '-';
+
+  const desconto = parseFloat(document.getElementById('fDesconto').value || '0');
+  const valorFinal = Math.max(precoVenda - desconto, 0);
+  document.getElementById('fValorFinal').value = fmtMoeda(valorFinal);
+
+  let novaMargem = 0;
+  if(valorFinal > 0){
+    novaMargem = ((valorFinal - custoTotal) / valorFinal) * 100;
+  }
+  document.getElementById('fNovaMargem').value = novaMargem.toFixed(2).replace('.',',') + '%';
+}
+document.getElementById('fProduto').addEventListener('change', recalcVendaForm);
+document.getElementById('fDesconto').addEventListener('input', recalcVendaForm);
+
 // ============ VENDAS: CRUD ============
 document.getElementById('formVenda').addEventListener('submit', (e)=>{
   e.preventDefault();
+  const produtoId = document.getElementById('fProduto').value;
+  const custo = custos.find(c=>c.id === produtoId);
+  if(!custo){ alert('Selecione um produto do estoque.'); return; }
+
+  const precificacao = precificacoes.find(p=>p.produtoId === produtoId);
+  const custoTotal = custo.custoTotal;
+  const precoVenda = precificacao ? precificacao.precoAjustado : 0;
+  const desconto = parseFloat(document.getElementById('fDesconto').value || '0');
+  const valorFinal = Math.max(precoVenda - desconto, 0);
+  const novaMargem = valorFinal > 0 ? ((valorFinal - custoTotal) / valorFinal) * 100 : 0;
+
   const venda = {
     id: Date.now().toString(36),
     data: document.getElementById('fData').value,
     vendedor: document.getElementById('fVendedor').value.trim(),
-    produto: document.getElementById('fProduto').value.trim(),
+    produtoId,
+    produto: `${custo.codigo ? custo.codigo + ' — ' : ''}${custo.nome}`,
     pagamento: document.getElementById('fPagamento').value,
-    valor: parseFloat(document.getElementById('fValor').value || '0')
+    custoTotal,
+    precoVenda,
+    desconto,
+    valor: valorFinal,
+    margem: novaMargem
   };
   vendas.push(venda);
   e.target.reset();
+  recalcVendaForm();
   renderAll();
   saveToGitHub();
 });
@@ -528,6 +633,15 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
 function deleteVenda(id){
   if(!confirm('Remover esta venda?')) return;
   vendas = vendas.filter(v=>v.id !== id);
+  renderAll();
+  saveToGitHub();
+}
+
+// ============ ESTOQUE: alterar status ============
+function alterarStatusEstoque(id, novoStatus){
+  const c = custos.find(c=>c.id === id);
+  if(!c) return;
+  c.status = novoStatus;
   renderAll();
   saveToGitHub();
 }
@@ -574,7 +688,8 @@ document.getElementById('formCusto').addEventListener('submit', (e)=>{
     qtdHoras, custoHora, totalHoras,
     maoObraTerceira,
     frete,
-    custoTotal
+    custoTotal,
+    status: 'Em Estoque'
   };
   custos.push(custo);
   e.target.reset();
@@ -713,7 +828,9 @@ function renderTabelaVendas(){
       <td>${v.vendedor || '-'}</td>
       <td>${v.produto || '-'}</td>
       <td>${v.pagamento || '-'}</td>
+      <td class="num">${fmtMoeda(v.desconto)}</td>
       <td class="num">${fmtMoeda(v.valor)}</td>
+      <td class="num">${(v.margem||0).toFixed(2).replace('.',',')}%</td>
       <td><button class="del-btn" onclick="deleteVenda('${v.id}')">remover</button></td>
     `;
     tbody.appendChild(tr);
@@ -857,17 +974,47 @@ function renderTabelaPrecificacao(){
   });
 }
 
+function renderEstoque(){
+  const tbody = document.getElementById('tbodyEstoque');
+  const empty = document.getElementById('emptyEstoque');
+  tbody.innerHTML = '';
+  if(custos.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  custos.forEach(c=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.codigo || '-'}</td>
+      <td>${c.nome || '-'}</td>
+      <td class="num">${fmtMoeda(c.custoTotal)}</td>
+      <td>
+        <select onchange="alterarStatusEstoque('${c.id}', this.value)" style="width:auto;padding:6px 8px;font-size:12px;">
+          <option value="Em Estoque" ${(!c.status || c.status==='Em Estoque')?'selected':''}>Em Estoque</option>
+          <option value="Vendido" ${c.status==='Vendido'?'selected':''}>Vendido</option>
+          <option value="Reservado" ${c.status==='Reservado'?'selected':''}>Reservado</option>
+        </select>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function renderAll(){
   renderTabelaVendas();
   renderKPIs();
   renderCharts();
   renderTabelaCustos();
+  renderEstoque();
   popularDropdownProdutos();
+  popularDropdownProdutosVenda();
   renderTabelaPrecificacao();
 }
 
 // ============ INIT ============
 recalcCustoForm();
+recalcVendaForm();
 loadFromGitHub();
 </script>
 
