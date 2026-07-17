@@ -79,6 +79,16 @@
       "vencimento": "2026-07-24",
       "origem": "venda",
       "vendaId": "mrpbsy51"
+    },
+    {
+      "id": "mrpbtpek",
+      "tipo": "Saída",
+      "dataEmissao": "2026-07-17",
+      "descricao": "linhas",
+      "valor": 150,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-07-17",
+      "origem": "manual"
     }
   ]
 }
