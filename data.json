@@ -1,5 +1,32 @@
 {
-  "vendas": [],
+  "vendas": [
+    {
+      "id": "mrpbsy51",
+      "data": "2026-07-17",
+      "vendedor": "MARI",
+      "produtoId": "mrp8sf5w",
+      "produto": "MKYNOS — Conjunto Preto Mykonos",
+      "pagamento": "Parcelado (2x)",
+      "custoTotal": 523.81,
+      "precoVenda": 1390,
+      "desconto": 0,
+      "valor": 1390,
+      "margem": 62.3158273381295,
+      "parcelado": true,
+      "parcelas": [
+        {
+          "numero": 1,
+          "vencimento": "2026-07-17",
+          "valor": 695
+        },
+        {
+          "numero": 2,
+          "vencimento": "2026-07-24",
+          "valor": 695
+        }
+      ]
+    }
+  ],
   "custos": [
     {
       "id": "mrp8sf5w",
@@ -14,7 +41,7 @@
       "maoObraTerceira": 290,
       "frete": 46.61,
       "custoTotal": 523.81,
-      "status": "Em Estoque"
+      "status": "Vendido"
     }
   ],
   "precificacoes": [
@@ -30,5 +57,28 @@
       "margemAtualizada": 62.3158273381295
     }
   ],
-  "fluxoCaixa": []
+  "fluxoCaixa": [
+    {
+      "id": "mrpbsy51-fc-1",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-17",
+      "descricao": "Venda — MKYNOS — Conjunto Preto Mykonos (parcela 1/2)",
+      "valor": 695,
+      "formaPagamento": "Parcelado (2x)",
+      "vencimento": "2026-07-17",
+      "origem": "venda",
+      "vendaId": "mrpbsy51"
+    },
+    {
+      "id": "mrpbsy51-fc-2",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-17",
+      "descricao": "Venda — MKYNOS — Conjunto Preto Mykonos (parcela 2/2)",
+      "valor": 695,
+      "formaPagamento": "Parcelado (2x)",
+      "vencimento": "2026-07-24",
+      "origem": "venda",
+      "vendaId": "mrpbsy51"
+    }
+  ]
 }
