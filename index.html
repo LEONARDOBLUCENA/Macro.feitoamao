@@ -399,6 +399,11 @@
 
   <!-- ESTOQUE -->
   <section id="estoque" class="tab">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Itens em Estoque</div><div class="value" id="kpiEstoqueQtd">0</div></div>
+      <div class="kpi"><div class="label">Custo Total Parado</div><div class="value" id="kpiEstoqueCusto">R$ 0,00</div></div>
+      <div class="kpi"><div class="label">Faturamento Potencial</div><div class="value" id="kpiEstoqueFaturamento">R$ 0,00</div></div>
+    </div>
     <div class="card">
       <h2>Produtos em estoque</h2>
       <table>
@@ -406,6 +411,7 @@
           <tr>
             <th>Código</th><th>Produto</th>
             <th style="text-align:right">Custo Total</th>
+            <th style="text-align:right">Preço de Venda</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -1036,17 +1042,31 @@ function renderEstoque(){
   const tbody = document.getElementById('tbodyEstoque');
   const empty = document.getElementById('emptyEstoque');
   tbody.innerHTML = '';
+
+  const emEstoque = custos.filter(c=>!c.status || c.status === 'Em Estoque');
+  const custoParado = emEstoque.reduce((s,c)=> s + (c.custoTotal||0), 0);
+  const faturamentoPotencial = emEstoque.reduce((s,c)=>{
+    const p = precificacoes.find(p=>p.produtoId === c.id);
+    return s + (p ? (p.precoAjustado||0) : 0);
+  }, 0);
+
+  document.getElementById('kpiEstoqueQtd').textContent = emEstoque.length;
+  document.getElementById('kpiEstoqueCusto').textContent = fmtMoeda(custoParado);
+  document.getElementById('kpiEstoqueFaturamento').textContent = fmtMoeda(faturamentoPotencial);
+
   if(custos.length === 0){
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
   custos.forEach(c=>{
+    const p = precificacoes.find(p=>p.produtoId === c.id);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${c.codigo || '-'}</td>
       <td>${c.nome || '-'}</td>
       <td class="num">${fmtMoeda(c.custoTotal)}</td>
+      <td class="num">${p ? fmtMoeda(p.precoAjustado) : 'sem precificação'}</td>
       <td>
         <select onchange="alterarStatusEstoque('${c.id}', this.value)" style="width:auto;padding:6px 8px;font-size:12px;">
           <option value="Em Estoque" ${(!c.status || c.status==='Em Estoque')?'selected':''}>Em Estoque</option>
