@@ -202,19 +202,46 @@
 
   <!-- DASHBOARD -->
   <section id="dashboard" class="tab active">
+    <div class="card" style="margin-bottom:20px;">
+      <h2 style="margin-bottom:14px;">Filtro</h2>
+      <div class="entry" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,220px));gap:12px;">
+        <div>
+          <label>Ano</label>
+          <select id="filtroAno"><option value="">Todos</option></select>
+        </div>
+        <div>
+          <label>Mês</label>
+          <select id="filtroMes">
+            <option value="">Todos</option>
+            <option value="01">Janeiro</option>
+            <option value="02">Fevereiro</option>
+            <option value="03">Março</option>
+            <option value="04">Abril</option>
+            <option value="05">Maio</option>
+            <option value="06">Junho</option>
+            <option value="07">Julho</option>
+            <option value="08">Agosto</option>
+            <option value="09">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <div class="kpis">
       <div class="kpi"><div class="label">Total vendido</div><div class="value" id="kpiTotal">R$ 0,00</div></div>
       <div class="kpi"><div class="label">Nº de vendas</div><div class="value" id="kpiQtd">0</div></div>
       <div class="kpi"><div class="label">Ticket médio</div><div class="value" id="kpiTicket">R$ 0,00</div></div>
-      <div class="kpi"><div class="label">Melhor vendedor</div><div class="value" id="kpiTop">-</div></div>
+      <div class="kpi"><div class="label">Margem de Lucro</div><div class="value" id="kpiMargem">0,00%</div></div>
     </div>
     <div class="card">
-      <h2>Vendas por dia</h2>
-      <canvas id="chartVendasDia" height="90"></canvas>
+      <h2>Faturamento Mensal</h2>
+      <canvas id="chartFaturamentoMensal" height="90"></canvas>
     </div>
     <div class="card">
-      <h2>Vendas por vendedor</h2>
-      <canvas id="chartVendedor" height="90"></canvas>
+      <h2>Margem de Lucro por Mês</h2>
+      <canvas id="chartMargemMensal" height="90"></canvas>
     </div>
   </section>
 
@@ -843,80 +870,79 @@ function renderTabelaVendas(){
   });
 }
 
+// ============ DASHBOARD: filtros ============
+function popularFiltroAno(){
+  const select = document.getElementById('filtroAno');
+  const valorAtual = select.value;
+  const anos = [...new Set(vendas.filter(v=>v.data).map(v=>v.data.slice(0,4)))].sort((a,b)=>b.localeCompare(a));
+  select.innerHTML = '<option value="">Todos</option>';
+  anos.forEach(ano=>{
+    const opt = document.createElement('option');
+    opt.value = ano;
+    opt.textContent = ano;
+    select.appendChild(opt);
+  });
+  if(anos.includes(valorAtual)) select.value = valorAtual;
+}
+function getVendasFiltradas(){
+  const ano = document.getElementById('filtroAno').value;
+  const mes = document.getElementById('filtroMes').value;
+  return vendas.filter(v=>{
+    if(!v.data) return !ano && !mes;
+    if(ano && v.data.slice(0,4) !== ano) return false;
+    if(mes && v.data.slice(5,7) !== mes) return false;
+    return true;
+  });
+}
+document.getElementById('filtroAno').addEventListener('change', renderAll);
+document.getElementById('filtroMes').addEventListener('change', renderAll);
+
 function renderKPIs(){
-  const total = vendas.reduce((s,v)=> s + (v.valor||0), 0);
-  const qtd = vendas.length;
+  const filtradas = getVendasFiltradas();
+  const total = filtradas.reduce((s,v)=> s + (v.valor||0), 0);
+  const custoTotal = filtradas.reduce((s,v)=> s + (v.custoTotal||0), 0);
+  const qtd = filtradas.length;
   const ticket = qtd > 0 ? total / qtd : 0;
+  const margem = total > 0 ? ((total - custoTotal) / total) * 100 : 0;
 
   document.getElementById('kpiTotal').textContent = fmtMoeda(total);
   document.getElementById('kpiQtd').textContent = qtd;
   document.getElementById('kpiTicket').textContent = fmtMoeda(ticket);
-
-  const porVendedor = {};
-  vendas.forEach(v=>{
-    const nome = v.vendedor || 'Sem nome';
-    porVendedor[nome] = (porVendedor[nome]||0) + (v.valor||0);
-  });
-  let top = '-';
-  let topVal = -1;
-  Object.entries(porVendedor).forEach(([nome,val])=>{
-    if(val > topVal){ topVal = val; top = nome; }
-  });
-  document.getElementById('kpiTop').textContent = top;
+  document.getElementById('kpiMargem').textContent = margem.toFixed(2).replace('.',',') + '%';
 }
 
-let chartDia, chartVendedor;
+let chartFaturamento, chartMargem;
 function renderCharts(){
-  const porDia = {};
-  vendas.forEach(v=>{
-    const d = v.data || 'sem data';
-    porDia[d] = (porDia[d]||0) + (v.valor||0);
-  });
-  const diasOrdenados = Object.keys(porDia).sort();
+  const ano = document.getElementById('filtroAno').value;
+  const nomesMeses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  const ctxDia = document.getElementById('chartVendasDia');
-  if(chartDia) chartDia.destroy();
-  chartDia = new Chart(ctxDia, {
-    type: 'line',
-    data: {
-      labels: diasOrdenados.map(d => d==='sem data' ? d : new Date(d+'T00:00:00').toLocaleDateString('pt-BR')),
-      datasets: [{
-        label: 'Vendas (R$)',
-        data: diasOrdenados.map(d => porDia[d]),
-        borderColor: '#463730',
-        backgroundColor: 'rgba(70,55,48,0.12)',
-        pointBackgroundColor: '#463730',
-        fill: true,
-        tension: 0.25
-      }]
-    },
-    options: {
-      responsive:true,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{font:{family:'Montserrat',size:11}},grid:{color:'#e4dcd2'}},
-        y:{ticks:{font:{family:'Montserrat',size:11}},grid:{color:'#e4dcd2'}}
-      }
-    }
+  // gráficos mensais respeitam o filtro de Ano (para mostrar a tendência do ano inteiro),
+  // mas não o filtro de Mês, que é usado só nos KPIs
+  const base = ano ? vendas.filter(v=> v.data && v.data.slice(0,4) === ano) : vendas.filter(v=>v.data);
+
+  const grupos = {};
+  base.forEach(v=>{
+    const chave = ano ? v.data.slice(5,7) : v.data.slice(0,7);
+    if(!grupos[chave]) grupos[chave] = { total:0, custo:0 };
+    grupos[chave].total += (v.valor||0);
+    grupos[chave].custo += (v.custoTotal||0);
   });
 
-  const porVendedor = {};
-  vendas.forEach(v=>{
-    const nome = v.vendedor || 'Sem nome';
-    porVendedor[nome] = (porVendedor[nome]||0) + (v.valor||0);
-  });
-  const nomes = Object.keys(porVendedor);
+  const chaves = Object.keys(grupos).sort();
+  const labels = chaves.map(k => ano ? nomesMeses[parseInt(k,10)-1] : (nomesMeses[parseInt(k.slice(5,7),10)-1] + '/' + k.slice(0,4)));
+  const faturamentoData = chaves.map(k => grupos[k].total);
+  const margemData = chaves.map(k => grupos[k].total > 0 ? ((grupos[k].total - grupos[k].custo) / grupos[k].total) * 100 : 0);
 
-  const ctxV = document.getElementById('chartVendedor');
-  if(chartVendedor) chartVendedor.destroy();
-  chartVendedor = new Chart(ctxV, {
+  const ctxFat = document.getElementById('chartFaturamentoMensal');
+  if(chartFaturamento) chartFaturamento.destroy();
+  chartFaturamento = new Chart(ctxFat, {
     type: 'bar',
     data: {
-      labels: nomes,
+      labels,
       datasets: [{
-        label: 'Vendas (R$)',
-        data: nomes.map(n => porVendedor[n]),
-        backgroundColor: ['#463730','#a2968c','#D1BAA6','#d0c3b4','#262626'],
+        label: 'Faturamento (R$)',
+        data: faturamentoData,
+        backgroundColor: '#463730',
         borderRadius:4
       }]
     },
@@ -926,6 +952,32 @@ function renderCharts(){
       scales:{
         x:{ticks:{font:{family:'Montserrat',size:11}},grid:{display:false}},
         y:{ticks:{font:{family:'Montserrat',size:11}},grid:{color:'#e4dcd2'}}
+      }
+    }
+  });
+
+  const ctxMargem = document.getElementById('chartMargemMensal');
+  if(chartMargem) chartMargem.destroy();
+  chartMargem = new Chart(ctxMargem, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Margem de Lucro (%)',
+        data: margemData,
+        borderColor: '#a2968c',
+        backgroundColor: 'rgba(162,150,140,0.15)',
+        pointBackgroundColor: '#a2968c',
+        fill: true,
+        tension: 0.25
+      }]
+    },
+    options: {
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{font:{family:'Montserrat',size:11}},grid:{display:false}},
+        y:{ticks:{font:{family:'Montserrat',size:11},callback:v=>v+'%'},grid:{color:'#e4dcd2'}}
       }
     }
   });
@@ -1008,6 +1060,7 @@ function renderEstoque(){
 }
 
 function renderAll(){
+  popularFiltroAno();
   renderTabelaVendas();
   renderKPIs();
   renderCharts();
