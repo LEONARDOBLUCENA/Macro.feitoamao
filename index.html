@@ -308,6 +308,10 @@
           <input type="number" id="cMaoObraTerceira" step="0.01" min="0" value="0">
         </div>
         <div>
+          <label>Total de Frete (R$)</label>
+          <input type="number" id="cFrete" step="0.01" min="0" value="0">
+        </div>
+        <div>
           <label>Custo Total da Peça</label>
           <input type="text" id="cCustoTotal" value="R$ 0,00" disabled>
         </div>
@@ -326,6 +330,7 @@
             <th style="text-align:right">Total Linhas</th>
             <th style="text-align:right">Total Horas</th>
             <th style="text-align:right">Mão Obra 3ª</th>
+            <th style="text-align:right">Frete</th>
             <th style="text-align:right">Custo Total</th>
             <th></th>
           </tr>
@@ -534,16 +539,17 @@ function recalcCustoForm(){
   const qtdHoras = parseFloat(document.getElementById('cQtdHoras').value || '0');
   const custoHora = parseFloat(document.getElementById('cCustoHora').value || '0');
   const maoObraTerceira = parseFloat(document.getElementById('cMaoObraTerceira').value || '0');
+  const frete = parseFloat(document.getElementById('cFrete').value || '0');
 
   const totalLinhas = qtdLinhas * custoLinha;
   const totalHoras = qtdHoras * custoHora;
-  const custoTotal = totalLinhas + totalHoras + maoObraTerceira;
+  const custoTotal = totalLinhas + totalHoras + maoObraTerceira + frete;
 
   document.getElementById('cTotalLinhas').value = fmtMoeda(totalLinhas);
   document.getElementById('cTotalHoras').value = fmtMoeda(totalHoras);
   document.getElementById('cCustoTotal').value = fmtMoeda(custoTotal);
 }
-['cQtdLinhas','cCustoLinha','cQtdHoras','cCustoHora','cMaoObraTerceira'].forEach(id=>{
+['cQtdLinhas','cCustoLinha','cQtdHoras','cCustoHora','cMaoObraTerceira','cFrete'].forEach(id=>{
   document.getElementById(id).addEventListener('input', recalcCustoForm);
 });
 
@@ -555,9 +561,10 @@ document.getElementById('formCusto').addEventListener('submit', (e)=>{
   const qtdHoras = parseFloat(document.getElementById('cQtdHoras').value || '0');
   const custoHora = parseFloat(document.getElementById('cCustoHora').value || '0');
   const maoObraTerceira = parseFloat(document.getElementById('cMaoObraTerceira').value || '0');
+  const frete = parseFloat(document.getElementById('cFrete').value || '0');
   const totalLinhas = qtdLinhas * custoLinha;
   const totalHoras = qtdHoras * custoHora;
-  const custoTotal = totalLinhas + totalHoras + maoObraTerceira;
+  const custoTotal = totalLinhas + totalHoras + maoObraTerceira + frete;
 
   const custo = {
     id: Date.now().toString(36),
@@ -566,6 +573,7 @@ document.getElementById('formCusto').addEventListener('submit', (e)=>{
     qtdLinhas, custoLinha, totalLinhas,
     qtdHoras, custoHora, totalHoras,
     maoObraTerceira,
+    frete,
     custoTotal
   };
   custos.push(custo);
@@ -817,6 +825,7 @@ function renderTabelaCustos(){
       <td class="num">${fmtMoeda(c.totalLinhas)}</td>
       <td class="num">${fmtMoeda(c.totalHoras)}</td>
       <td class="num">${fmtMoeda(c.maoObraTerceira)}</td>
+      <td class="num">${fmtMoeda(c.frete)}</td>
       <td class="num">${fmtMoeda(c.custoTotal)}</td>
       <td><button class="del-btn" onclick="deleteCusto('${c.id}')">remover</button></td>
     `;
