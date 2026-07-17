@@ -91,7 +91,7 @@
       "formaPagamento": "Pix",
       "vencimento": "2026-07-17",
       "origem": "manual",
-      "pago": true
+      "pago": false
     }
   ]
 }
