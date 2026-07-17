@@ -624,6 +624,7 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
     margem: novaMargem
   };
   vendas.push(venda);
+  custo.status = 'Vendido';
   e.target.reset();
   recalcVendaForm();
   renderAll();
@@ -632,6 +633,11 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
 
 function deleteVenda(id){
   if(!confirm('Remover esta venda?')) return;
+  const venda = vendas.find(v=>v.id === id);
+  if(venda && venda.produtoId){
+    const custo = custos.find(c=>c.id === venda.produtoId);
+    if(custo) custo.status = 'Em Estoque';
+  }
   vendas = vendas.filter(v=>v.id !== id);
   renderAll();
   saveToGitHub();
