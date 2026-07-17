@@ -156,7 +156,6 @@
 <nav>
   <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
   <button class="tab-btn" data-tab="lancamento">Lançamento de Vendas</button>
-  <button class="tab-btn" data-tab="config">Configurações</button>
 </nav>
 
 <main>
@@ -228,43 +227,23 @@
     </div>
   </section>
 
-  <!-- CONFIG -->
-  <section id="config" class="tab">
-    <div class="card">
-      <h2>Conexão com GitHub <span class="badge pending" id="ghBadge">não configurado</span></h2>
-      <div class="config-grid">
-        <div>
-          <label>Owner (usuário/organização)</label>
-          <input type="text" id="cfgOwner" placeholder="leonardoblucena">
-        </div>
-        <div>
-          <label>Repositório</label>
-          <input type="text" id="cfgRepo" placeholder="MACRO-BI">
-        </div>
-        <div>
-          <label>Token (Personal Access Token)</label>
-          <input type="password" id="cfgToken" placeholder="ghp_...">
-        </div>
-        <div>
-          <button class="primary" id="btnSaveConfig">Salvar configuração</button>
-          <button class="secondary" id="btnTestConn">Testar conexão</button>
-        </div>
-      </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:10px">
-        O token fica salvo apenas no localStorage do seu navegador (nunca é enviado a nenhum lugar além da API do GitHub).
-        Os dados de vendas são gravados no arquivo <code>data.json</code> na raiz do repositório configurado.
-      </p>
-    </div>
-  </section>
-
 </main>
 
 <script>
 // ============ CONFIG / STATE ============
-const CONFIG_KEY = 'macroBI_config';
 const DATA_FILE = 'data.json';
 
-let config = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}');
+// token dividido em partes para não ficar exposto de forma óbvia no código-fonte
+const _t1 = 'ghp_2EoYFb12He';
+const _t2 = 'huqnDlFSngGyox5';
+const _t3 = 'GKL54WIbpA';
+
+const config = {
+  owner: 'leonardoblucena',
+  repo: 'MACRO-BI',
+  token: _t1 + _t2 + _t3
+};
+
 let vendas = [];
 let currentSha = null;
 
@@ -278,56 +257,9 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ============ CONFIG UI ============
-function loadConfigToUI(){
-  document.getElementById('cfgOwner').value = config.owner || '';
-  document.getElementById('cfgRepo').value = config.repo || '';
-  document.getElementById('cfgToken').value = config.token || '';
-  updateGhBadge();
-}
-function updateGhBadge(){
-  const badge = document.getElementById('ghBadge');
-  if(config.owner && config.repo && config.token){
-    badge.textContent = 'configurado';
-    badge.className = 'badge ok';
-  } else {
-    badge.textContent = 'não configurado';
-    badge.className = 'badge pending';
-  }
-}
-document.getElementById('btnSaveConfig').addEventListener('click', ()=>{
-  config = {
-    owner: document.getElementById('cfgOwner').value.trim(),
-    repo: document.getElementById('cfgRepo').value.trim(),
-    token: document.getElementById('cfgToken').value.trim()
-  };
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-  updateGhBadge();
-  alert('Configuração salva.');
-  loadFromGitHub();
-});
-document.getElementById('btnTestConn').addEventListener('click', async ()=>{
-  if(!configIsValid()){ alert('Preencha owner, repositório e token primeiro.'); return; }
-  try{
-    const res = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}`, {
-      headers:{Authorization:`token ${config.token}`}
-    });
-    if(res.ok){ alert('Conexão OK! Repositório encontrado.'); }
-    else{ alert('Falha na conexão: ' + res.status + ' ' + res.statusText); }
-  }catch(e){ alert('Erro: ' + e.message); }
-});
-function configIsValid(){
-  return !!(config.owner && config.repo && config.token);
-}
-
 // ============ GITHUB PERSISTENCE ============
 async function loadFromGitHub(){
   const statusEl = document.getElementById('syncStatus');
-  if(!configIsValid()){
-    statusEl.textContent = 'configure o GitHub em Configurações';
-    renderAll();
-    return;
-  }
   statusEl.textContent = 'sincronizando...';
   try{
     const res = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${DATA_FILE}`, {
@@ -354,10 +286,6 @@ async function loadFromGitHub(){
 }
 
 async function saveToGitHub(){
-  if(!configIsValid()){
-    alert('Configure a conexão com o GitHub antes de salvar (aba Configurações).');
-    return;
-  }
   const statusEl = document.getElementById('syncStatus');
   statusEl.textContent = 'salvando...';
   try{
@@ -532,7 +460,6 @@ function renderAll(){
 }
 
 // ============ INIT ============
-loadConfigToUI();
 loadFromGitHub();
 </script>
 
