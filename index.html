@@ -196,6 +196,7 @@
   <button class="tab-btn" data-tab="custos">Lançamento de Custos</button>
   <button class="tab-btn" data-tab="estoque">Estoque</button>
   <button class="tab-btn" data-tab="precificacao">Precificação</button>
+  <button class="tab-btn" data-tab="fluxocaixa">Fluxo de Caixa</button>
 </nav>
 
 <main>
@@ -316,7 +317,6 @@
         <thead>
           <tr>
             <th>Data</th><th>Vendedor</th><th>Produto</th><th>Pagamento</th>
-            <th>Vencimento</th>
             <th style="text-align:right">Desconto</th>
             <th style="text-align:right">Valor</th>
             <th style="text-align:right">Margem</th>
@@ -488,6 +488,68 @@
     </div>
   </section>
 
+  <!-- FLUXO DE CAIXA -->
+  <section id="fluxocaixa" class="tab">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Total Entradas</div><div class="value" id="kpiFcEntradas">R$ 0,00</div></div>
+      <div class="kpi"><div class="label">Total Saídas</div><div class="value" id="kpiFcSaidas">R$ 0,00</div></div>
+      <div class="kpi"><div class="label">Saldo</div><div class="value" id="kpiFcSaldo">R$ 0,00</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Novo custo / despesa</h2>
+      <form class="entry" id="formFluxoCaixa">
+        <div>
+          <label>Data de Emissão</label>
+          <input type="date" id="fcData" required>
+        </div>
+        <div>
+          <label>Descrição</label>
+          <input type="text" id="fcDescricao" placeholder="Ex: Compra de linhas" required>
+        </div>
+        <div>
+          <label>Valor (R$)</label>
+          <input type="number" id="fcValor" step="0.01" min="0" required>
+        </div>
+        <div>
+          <label>Forma de pagamento</label>
+          <select id="fcPagamento">
+            <option>Pix</option>
+            <option>Cartão</option>
+            <option>Dinheiro</option>
+            <option>Boleto</option>
+            <option>Parcelado</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div id="fcParcelasContainer" style="display:none;">
+          <label>Número de Parcelas</label>
+          <input type="number" id="fcNumParcelas" min="1" step="1" value="2">
+        </div>
+        <div id="fcVencimentosContainer" style="display:none;grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;"></div>
+        <div>
+          <button type="submit" class="primary">Adicionar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Lançamentos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Data Emissão</th><th>Descrição</th><th>Tipo</th><th>Origem</th>
+            <th>Forma Pagamento</th><th>Vencimento</th>
+            <th style="text-align:right">Valor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyFluxoCaixa"></tbody>
+      </table>
+      <div class="empty" id="emptyFluxoCaixa" style="display:none">Nenhum lançamento no fluxo de caixa ainda.</div>
+    </div>
+  </section>
+
 </main>
 
 <script>
@@ -508,6 +570,7 @@ const config = {
 let vendas = [];
 let custos = [];
 let precificacoes = [];
+let fluxoCaixa = [];
 let currentSha = null;
 
 // ============ TABS ============
@@ -532,6 +595,7 @@ async function loadFromGitHub(){
       vendas = [];
       custos = [];
       precificacoes = [];
+      fluxoCaixa = [];
       currentSha = null;
       statusEl.textContent = 'nenhum dado ainda (novo arquivo será criado ao salvar)';
     } else if(res.ok){
@@ -542,6 +606,7 @@ async function loadFromGitHub(){
       vendas = parsed.vendas || [];
       custos = parsed.custos || [];
       precificacoes = parsed.precificacoes || [];
+      fluxoCaixa = parsed.fluxoCaixa || [];
       statusEl.textContent = 'sincronizado ✓';
     } else {
       statusEl.textContent = 'erro ao carregar (' + res.status + ')';
@@ -565,7 +630,7 @@ async function saveToGitHub(){
       const json = await getRes.json();
       sha = json.sha;
     }
-    const payload = { vendas, custos, precificacoes };
+    const payload = { vendas, custos, precificacoes, fluxoCaixa };
     const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
     const body = {
       message: 'Atualiza data.json — ' + new Date().toISOString(),
@@ -680,6 +745,9 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
   const produtoNome = `${custo.codigo ? custo.codigo + ' — ' : ''}${custo.nome}`;
   const pagamento = document.getElementById('fPagamento').value;
 
+  let parcelas = null;
+  let pagamentoLabel = pagamento;
+
   if(pagamento === 'Parcelado'){
     const numParcelas = parseInt(document.getElementById('fNumParcelas').value || '0', 10);
     if(numParcelas < 1){ alert('Informe um número de parcelas válido.'); return; }
@@ -692,40 +760,59 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
     }
 
     const valorParcela = valorFinal / numParcelas;
-    const custoParcela = custoTotal / numParcelas;
-    const descontoParcela = desconto / numParcelas;
-    const idBase = Date.now().toString(36);
+    parcelas = vencimentos.map((venc, idx)=>({
+      numero: idx + 1,
+      vencimento: venc,
+      valor: valorParcela
+    }));
+    pagamentoLabel = `Parcelado (${numParcelas}x)`;
+  }
 
-    vencimentos.forEach((venc, idx)=>{
-      vendas.push({
-        id: idBase + '-' + (idx+1),
-        data: dataVenda,
-        vencimento: venc,
-        vendedor,
-        produtoId,
-        produto: produtoNome,
-        pagamento: `Parcelado (${idx+1}/${numParcelas})`,
-        custoTotal: custoParcela,
-        precoVenda,
-        desconto: descontoParcela,
-        valor: valorParcela,
-        margem: novaMargem
+  // uma venda = um único registro, sempre com o valor cheio.
+  // as parcelas ficam guardadas só para efeito de fluxo de caixa (previsão de recebimento por data).
+  const vendaId = Date.now().toString(36);
+  vendas.push({
+    id: vendaId,
+    data: dataVenda,
+    vendedor,
+    produtoId,
+    produto: produtoNome,
+    pagamento: pagamentoLabel,
+    custoTotal,
+    precoVenda,
+    desconto,
+    valor: valorFinal,
+    margem: novaMargem,
+    parcelado: pagamento === 'Parcelado',
+    parcelas
+  });
+
+  // gera automaticamente os lançamentos de entrada no fluxo de caixa
+  if(parcelas){
+    parcelas.forEach(p=>{
+      fluxoCaixa.push({
+        id: vendaId + '-fc-' + p.numero,
+        tipo: 'Entrada',
+        dataEmissao: dataVenda,
+        descricao: `Venda — ${produtoNome} (parcela ${p.numero}/${parcelas.length})`,
+        valor: p.valor,
+        formaPagamento: pagamentoLabel,
+        vencimento: p.vencimento,
+        origem: 'venda',
+        vendaId
       });
     });
   } else {
-    vendas.push({
-      id: Date.now().toString(36),
-      data: dataVenda,
-      vencimento: dataVenda,
-      vendedor,
-      produtoId,
-      produto: produtoNome,
-      pagamento,
-      custoTotal,
-      precoVenda,
-      desconto,
+    fluxoCaixa.push({
+      id: vendaId + '-fc',
+      tipo: 'Entrada',
+      dataEmissao: dataVenda,
+      descricao: `Venda — ${produtoNome}`,
       valor: valorFinal,
-      margem: novaMargem
+      formaPagamento: pagamentoLabel,
+      vencimento: dataVenda,
+      origem: 'venda',
+      vendaId
     });
   }
 
@@ -740,14 +827,12 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
 function deleteVenda(id){
   if(!confirm('Remover esta venda?')) return;
   const venda = vendas.find(v=>v.id === id);
-  vendas = vendas.filter(v=>v.id !== id);
   if(venda && venda.produtoId){
-    const aindaTemOutras = vendas.some(v=>v.produtoId === venda.produtoId);
-    if(!aindaTemOutras){
-      const custo = custos.find(c=>c.id === venda.produtoId);
-      if(custo) custo.status = 'Em Estoque';
-    }
+    const custo = custos.find(c=>c.id === venda.produtoId);
+    if(custo) custo.status = 'Em Estoque';
   }
+  vendas = vendas.filter(v=>v.id !== id);
+  fluxoCaixa = fluxoCaixa.filter(f=>f.vendaId !== id);
   renderAll();
   saveToGitHub();
 }
@@ -921,6 +1006,90 @@ function deletePrecificacao(id){
   saveToGitHub();
 }
 
+// ============ FLUXO DE CAIXA: parcelamento (mesmo padrão da aba de vendas) ============
+function toggleParcelasUIFC(){
+  const parcelado = document.getElementById('fcPagamento').value === 'Parcelado';
+  document.getElementById('fcParcelasContainer').style.display = parcelado ? 'block' : 'none';
+  document.getElementById('fcVencimentosContainer').style.display = parcelado ? 'grid' : 'none';
+  if(parcelado) gerarCamposVencimentoFC();
+  else document.getElementById('fcVencimentosContainer').innerHTML = '';
+}
+function gerarCamposVencimentoFC(){
+  const n = Math.max(parseInt(document.getElementById('fcNumParcelas').value || '0', 10), 0);
+  const container = document.getElementById('fcVencimentosContainer');
+  const valoresAntigos = {};
+  container.querySelectorAll('input[type="date"]').forEach(inp=>{ valoresAntigos[inp.id] = inp.value; });
+  container.innerHTML = '';
+  for(let i=1; i<=n; i++){
+    const div = document.createElement('div');
+    const id = `fcVencimento_${i}`;
+    div.innerHTML = `<label>Vencimento da Parcela ${i}</label><input type="date" id="${id}" required>`;
+    container.appendChild(div);
+    if(valoresAntigos[id]) container.querySelector('#'+id).value = valoresAntigos[id];
+  }
+}
+document.getElementById('fcPagamento').addEventListener('change', toggleParcelasUIFC);
+document.getElementById('fcNumParcelas').addEventListener('input', gerarCamposVencimentoFC);
+
+// ============ FLUXO DE CAIXA: CRUD (lançamentos manuais de custo/despesa) ============
+document.getElementById('formFluxoCaixa').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const dataEmissao = document.getElementById('fcData').value;
+  const descricao = document.getElementById('fcDescricao').value.trim();
+  const valor = parseFloat(document.getElementById('fcValor').value || '0');
+  const pagamento = document.getElementById('fcPagamento').value;
+  const idBase = Date.now().toString(36);
+
+  if(pagamento === 'Parcelado'){
+    const numParcelas = parseInt(document.getElementById('fcNumParcelas').value || '0', 10);
+    if(numParcelas < 1){ alert('Informe um número de parcelas válido.'); return; }
+
+    const vencimentos = [];
+    for(let i=1; i<=numParcelas; i++){
+      const v = document.getElementById(`fcVencimento_${i}`).value;
+      if(!v){ alert(`Preencha o vencimento da parcela ${i}.`); return; }
+      vencimentos.push(v);
+    }
+    const valorParcela = valor / numParcelas;
+    const pagamentoLabel = `Parcelado (${numParcelas}x)`;
+    vencimentos.forEach((venc, idx)=>{
+      fluxoCaixa.push({
+        id: idBase + '-' + (idx+1),
+        tipo: 'Saída',
+        dataEmissao,
+        descricao: `${descricao} (parcela ${idx+1}/${numParcelas})`,
+        valor: valorParcela,
+        formaPagamento: pagamentoLabel,
+        vencimento: venc,
+        origem: 'manual'
+      });
+    });
+  } else {
+    fluxoCaixa.push({
+      id: idBase,
+      tipo: 'Saída',
+      dataEmissao,
+      descricao,
+      valor,
+      formaPagamento: pagamento,
+      vencimento: dataEmissao,
+      origem: 'manual'
+    });
+  }
+
+  e.target.reset();
+  toggleParcelasUIFC();
+  renderAll();
+  saveToGitHub();
+});
+
+function deleteFluxoCaixa(id){
+  if(!confirm('Remover este lançamento?')) return;
+  fluxoCaixa = fluxoCaixa.filter(f=>f.id !== id);
+  renderAll();
+  saveToGitHub();
+}
+
 // ============ RENDER ============
 function fmtMoeda(v){
   return (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
@@ -938,12 +1107,15 @@ function renderTabelaVendas(){
   empty.style.display = 'none';
   ordenadas.forEach(v=>{
     const tr = document.createElement('tr');
+    const vencimentoHtml = (v.parcelado && v.parcelas)
+      ? v.parcelas.map(p => new Date(p.vencimento+'T00:00:00').toLocaleDateString('pt-BR')).join(' • ')
+      : (v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-');
     tr.innerHTML = `
       <td>${v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
       <td>${v.vendedor || '-'}</td>
       <td>${v.produto || '-'}</td>
       <td>${v.pagamento || '-'}</td>
-      <td>${v.vencimento ? new Date(v.vencimento+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+      <td style="font-size:12px;">${vencimentoHtml}</td>
       <td class="num">${fmtMoeda(v.desconto)}</td>
       <td class="num">${fmtMoeda(v.valor)}</td>
       <td class="num">${(v.margem||0).toFixed(2).replace('.',',')}%</td>
@@ -1156,6 +1328,40 @@ function renderEstoque(){
   });
 }
 
+function renderFluxoCaixa(){
+  const tbody = document.getElementById('tbodyFluxoCaixa');
+  const empty = document.getElementById('emptyFluxoCaixa');
+  tbody.innerHTML = '';
+
+  const entradas = fluxoCaixa.filter(f=>f.tipo === 'Entrada').reduce((s,f)=> s + (f.valor||0), 0);
+  const saidas = fluxoCaixa.filter(f=>f.tipo === 'Saída').reduce((s,f)=> s + (f.valor||0), 0);
+  document.getElementById('kpiFcEntradas').textContent = fmtMoeda(entradas);
+  document.getElementById('kpiFcSaidas').textContent = fmtMoeda(saidas);
+  document.getElementById('kpiFcSaldo').textContent = fmtMoeda(entradas - saidas);
+
+  if(fluxoCaixa.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const ordenados = [...fluxoCaixa].sort((a,b)=> (b.vencimento||'').localeCompare(a.vencimento||''));
+  ordenados.forEach(f=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.dataEmissao ? new Date(f.dataEmissao+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+      <td>${f.descricao || '-'}</td>
+      <td>${f.tipo}</td>
+      <td>${f.origem === 'venda' ? 'Venda' : 'Manual'}</td>
+      <td>${f.formaPagamento || '-'}</td>
+      <td>${f.vencimento ? new Date(f.vencimento+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+      <td class="num" style="color:${f.tipo==='Entrada' ? 'var(--green)' : 'var(--red)'};">${f.tipo==='Saída' ? '-' : ''}${fmtMoeda(f.valor)}</td>
+      <td><button class="del-btn" onclick="deleteFluxoCaixa('${f.id}')">remover</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function renderAll(){
   popularFiltroAno();
   renderTabelaVendas();
@@ -1166,12 +1372,14 @@ function renderAll(){
   popularDropdownProdutos();
   popularDropdownProdutosVenda();
   renderTabelaPrecificacao();
+  renderFluxoCaixa();
 }
 
 // ============ INIT ============
 recalcCustoForm();
 recalcVendaForm();
 toggleParcelasUI();
+toggleParcelasUIFC();
 loadFromGitHub();
 </script>
 
