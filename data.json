@@ -79,7 +79,8 @@
       "formaPagamento": "Parcelado (2x)",
       "vencimento": "2026-07-24",
       "origem": "venda",
-      "vendaId": "mrpbsy51"
+      "vendaId": "mrpbsy51",
+      "pago": true
     },
     {
       "id": "mrpbtpek",
