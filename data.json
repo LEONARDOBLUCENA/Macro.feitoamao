@@ -80,7 +80,7 @@
       "vencimento": "2026-07-24",
       "origem": "venda",
       "vendaId": "mrpbsy51",
-      "pago": true
+      "pago": false
     },
     {
       "id": "mrpbtpek",
@@ -93,5 +93,6 @@
       "origem": "manual",
       "pago": false
     }
-  ]
+  ],
+  "materiais": []
 }
