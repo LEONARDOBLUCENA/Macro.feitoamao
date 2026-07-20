@@ -68,7 +68,7 @@
       "vencimento": "2026-07-17",
       "origem": "venda",
       "vendaId": "mrpbsy51",
-      "pago": false
+      "pago": true
     },
     {
       "id": "mrpbsy51-fc-2",
