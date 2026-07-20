@@ -58,6 +58,17 @@
       "precoSugerido": 433.6,
       "precoAjustado": 350,
       "margemAtualizada": -23.885714285714293
+    },
+    {
+      "id": "mrtja8jk",
+      "produtoId": "mrp8sf5w",
+      "produtoNome": "Conjunto Preto Mykonos",
+      "produtoCodigo": "MKYNOS",
+      "custoTotal": 523.81,
+      "margemDesejada": 62,
+      "precoSugerido": 1378.4473684210525,
+      "precoAjustado": 1390,
+      "margemAtualizada": 62.3158273381295
     }
   ],
   "fluxoCaixa": [],
