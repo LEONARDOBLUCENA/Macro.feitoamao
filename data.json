@@ -92,17 +92,6 @@
       "vencimento": "2026-07-17",
       "origem": "manual",
       "pago": false
-    },
-    {
-      "id": "mrt7de71",
-      "tipo": "Saída",
-      "dataEmissao": "2027-01-01",
-      "descricao": "linhas",
-      "valor": 1,
-      "formaPagamento": "Pix",
-      "vencimento": "2027-01-01",
-      "origem": "manual",
-      "pago": false
     }
   ],
   "materiais": []
