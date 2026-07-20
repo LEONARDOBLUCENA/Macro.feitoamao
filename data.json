@@ -71,18 +71,6 @@
       "margemAtualizada": -23.885714285714293
     }
   ],
-  "fluxoCaixa": [
-    {
-      "id": "mrpbtpek",
-      "tipo": "Saída",
-      "dataEmissao": "2026-07-17",
-      "descricao": "linhas",
-      "valor": 150,
-      "formaPagamento": "Pix",
-      "vencimento": "2026-07-17",
-      "origem": "manual",
-      "pago": false
-    }
-  ],
+  "fluxoCaixa": [],
   "materiais": []
 }
