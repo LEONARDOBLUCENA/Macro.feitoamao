@@ -57,6 +57,21 @@
       "frete": 40,
       "custoTotal": 433.6,
       "status": "Em Estoque"
+    },
+    {
+      "id": "mrthy6er",
+      "codigo": "03",
+      "nome": "Vestido pérola irregular",
+      "qtdLinhas": 2,
+      "custoLinha": 31.2,
+      "totalLinhas": 62.4,
+      "qtdHoras": 10,
+      "custoHora": 35,
+      "totalHoras": 350,
+      "maoObraTerceira": 0,
+      "frete": 35,
+      "custoTotal": 447.4,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
