@@ -42,6 +42,21 @@
       "frete": 46.61,
       "custoTotal": 523.81,
       "status": "Vendido"
+    },
+    {
+      "id": "mrthwv1s",
+      "codigo": "02",
+      "nome": "Saia Bella",
+      "qtdLinhas": 3,
+      "custoLinha": 31.2,
+      "totalLinhas": 93.6,
+      "qtdHoras": 10,
+      "custoHora": 30,
+      "totalHoras": 300,
+      "maoObraTerceira": 0,
+      "frete": 40,
+      "custoTotal": 433.6,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
