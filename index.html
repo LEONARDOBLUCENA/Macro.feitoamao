@@ -175,6 +175,43 @@
   td.num{text-align:right;font-variant-numeric:tabular-nums;}
   .del-btn{color:var(--red);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;background:none;border:none;font-family:var(--font-body);}
   .edit-btn{color:var(--primary);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;background:none;border:none;font-family:var(--font-body);margin-right:10px;}
+  .manual-box{
+    background:var(--marrom);
+    color:var(--off-white);
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    text-align:center;
+    padding:12px 20px;
+    border-radius:8px;
+    width:100%;
+    max-width:420px;
+  }
+  .manual-box .manual-sub, .manual-box-side .manual-sub{
+    font-weight:400;
+    font-size:11px;
+    color:var(--rose);
+    margin-top:4px;
+    line-height:1.4;
+  }
+  .manual-arrow{
+    color:var(--mauve);
+    font-size:20px;
+    line-height:1;
+    padding:4px 0;
+  }
+  .manual-box-side{
+    background:var(--mauve);
+    color:var(--off-white);
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:13px;
+    text-align:center;
+    padding:10px 16px;
+    border-radius:8px;
+    max-width:220px;
+  }
+  .manual-box-side .manual-sub{ color:var(--off-white); opacity:0.85; }
   .empty{color:var(--text-muted);font-size:13px;padding:20px 0;text-align:center;}
   .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
   .badge.ok{background:#eaf0e8;color:var(--green);}
@@ -184,9 +221,12 @@
 <body>
 
 <header>
-  <div class="logo-block">
-    <h1>Macrô</h1>
-    <div class="tagline">Feito com amor e história</div>
+  <div class="logo-block" style="display:flex;align-items:center;gap:16px;">
+    <div>
+      <h1>Macrô</h1>
+      <div class="tagline">Feito com amor e história</div>
+    </div>
+    <button id="btnAbrirManual" onclick="abrirManual()" style="background:transparent;border:1px solid var(--rose);color:var(--rose);padding:6px 14px;border-radius:20px;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Manual</button>
   </div>
   <div id="syncStatus">carregando...</div>
 </header>
@@ -630,6 +670,47 @@
   </section>
 
 </main>
+
+<!-- MODAL: MANUAL -->
+<div id="manualOverlay" onclick="if(event.target===this) fecharManual()" style="display:none;position:fixed;inset:0;background:rgba(38,38,38,0.55);z-index:100;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px;">
+  <div style="background:var(--off-white);border-radius:14px;max-width:760px;width:100%;padding:32px 32px 36px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <button onclick="fecharManual()" style="position:absolute;top:18px;right:18px;background:none;border:none;font-size:22px;color:var(--mauve);cursor:pointer;line-height:1;">&times;</button>
+    <h1 style="font-family:var(--font-display);color:var(--marrom);font-size:28px;margin:0 0 2px;">Manual Rápido</h1>
+    <p style="font-family:var(--font-body);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--mauve);margin:0 0 24px;">Como as abas se conectam</p>
+
+    <!-- FLUXOGRAMA -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:28px;">
+
+      <div class="manual-box">1. Lançamento de Custos<div class="manual-sub">Cadastra o custo de produção da peça</div></div>
+      <div class="manual-arrow">↓</div>
+      <div class="manual-box">2. Estoque<div class="manual-sub">Peça entra sozinha, status "Em Estoque"</div></div>
+      <div class="manual-arrow">↓</div>
+      <div class="manual-box">3. Precificação<div class="manual-sub">Define margem e preço de venda da peça</div></div>
+      <div class="manual-arrow">↓</div>
+      <div class="manual-box">4. Lançamento de Vendas<div class="manual-sub">Seleciona a peça (custo e preço já vêm prontos) e registra a venda</div></div>
+      <div class="manual-arrow">↓</div>
+      <div class="manual-box">5. Fluxo de Caixa<div class="manual-sub">Recebe a(s) entrada(s) automaticamente, na(s) data(s) certa(s)</div></div>
+
+      <div style="display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;justify-content:center;">
+        <div class="manual-box-side">Materiais por Produto<div class="manual-sub">Puxa a lista de peças de Lançamento de Custos — cadastro à parte</div></div>
+        <div class="manual-box-side">Dashboard<div class="manual-sub">Lê tudo de Lançamento de Vendas — só mostra, não alimenta nada</div></div>
+      </div>
+    </div>
+
+    <!-- RESUMO DE PREENCHIMENTO -->
+    <h2 style="font-family:var(--font-display);color:var(--marrom);font-size:19px;margin:0 0 10px;">Como preencher cada aba</h2>
+    <ol style="font-family:var(--font-body);font-size:13px;color:var(--preto);line-height:1.7;padding-left:18px;margin:0;">
+      <li><b>Lançamento de Custos</b> — preencha código, nome, linhas, horas, mão de obra terceira e frete. O custo total soma sozinho.</li>
+      <li><b>Estoque</b> — não precisa preencher nada; só acompanhe o status (muda pra "Vendido" sozinho quando a peça é vendida).</li>
+      <li><b>Precificação</b> — escolha a peça, digite a margem de lucro desejada, ajuste o preço sugerido se quiser, e salve.</li>
+      <li><b>Lançamento de Vendas</b> — escolha a peça (custo e preço já vêm prontos), aplique desconto se houver, escolha a forma de pagamento (parcelado abre os vencimentos) e adicione.</li>
+      <li><b>Fluxo de Caixa</b> — as entradas de venda chegam sozinhas; use o formulário só pra lançar despesas/custos manuais. Marque "Pago/Recebido" conforme for recebendo.</li>
+      <li><b>Materiais por Produto</b> — preencha código da linha, tamanho da agulha e cor direto na tabela, por peça.</li>
+      <li><b>Dashboard</b> — não precisa preencher nada; use os filtros de Ano/Mês pra ver o período que quiser.</li>
+    </ol>
+  </div>
+</div>
+
 
 <script>
 // ============ CONFIG / STATE ============
@@ -1746,6 +1827,17 @@ function renderAll(){
   renderFluxoCaixa();
   renderMateriais();
 }
+
+// ============ MANUAL ============
+function abrirManual(){
+  document.getElementById('manualOverlay').style.display = 'flex';
+}
+function fecharManual(){
+  document.getElementById('manualOverlay').style.display = 'none';
+}
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') fecharManual();
+});
 
 // ============ INIT ============
 recalcCustoForm();
