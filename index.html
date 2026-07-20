@@ -192,11 +192,12 @@
 
 <nav>
   <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-  <button class="tab-btn" data-tab="lancamento">Lançamento de Vendas</button>
-  <button class="tab-btn" data-tab="custos">Lançamento de Custos</button>
-  <button class="tab-btn" data-tab="estoque">Estoque</button>
-  <button class="tab-btn" data-tab="precificacao">Precificação</button>
   <button class="tab-btn" data-tab="fluxocaixa">Fluxo de Caixa</button>
+  <button class="tab-btn" data-tab="custos">Lançamento de Custos</button>
+  <button class="tab-btn" data-tab="lancamento">Lançamento de Vendas</button>
+  <button class="tab-btn" data-tab="precificacao">Precificação</button>
+  <button class="tab-btn" data-tab="estoque">Estoque</button>
+  <button class="tab-btn" data-tab="materiais">Materiais por Produto</button>
 </nav>
 
 <main>
@@ -428,6 +429,25 @@
     </div>
   </section>
 
+  <!-- MATERIAIS POR PRODUTO -->
+  <section id="materiais" class="tab">
+    <div class="card">
+      <h2>Materiais por Produto</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Produto</th>
+            <th>Código da Linha</th>
+            <th>Tamanho da Agulha</th>
+            <th>Cor</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyMateriais"></tbody>
+      </table>
+      <div class="empty" id="emptyMateriais" style="display:none">Nenhum produto cadastrado ainda. Lance um custo na aba "Lançamento de Custos" para o produto aparecer aqui.</div>
+    </div>
+  </section>
+
   <!-- PRECIFICAÇÃO -->
   <section id="precificacao" class="tab">
     <div class="card">
@@ -622,6 +642,7 @@ let vendas = [];
 let custos = [];
 let precificacoes = [];
 let fluxoCaixa = [];
+let materiais = [];
 let currentSha = null;
 
 // ============ TABS ============
@@ -647,6 +668,7 @@ async function loadFromGitHub(){
       custos = [];
       precificacoes = [];
       fluxoCaixa = [];
+      materiais = [];
       currentSha = null;
       statusEl.textContent = 'nenhum dado ainda (novo arquivo será criado ao salvar)';
     } else if(res.ok){
@@ -658,6 +680,7 @@ async function loadFromGitHub(){
       custos = parsed.custos || [];
       precificacoes = parsed.precificacoes || [];
       fluxoCaixa = parsed.fluxoCaixa || [];
+      materiais = parsed.materiais || [];
       statusEl.textContent = 'sincronizado ✓';
     } else {
       statusEl.textContent = 'erro ao carregar (' + res.status + ')';
@@ -681,7 +704,7 @@ async function saveToGitHub(){
       const json = await getRes.json();
       sha = json.sha;
     }
-    const payload = { vendas, custos, precificacoes, fluxoCaixa };
+    const payload = { vendas, custos, precificacoes, fluxoCaixa, materiais };
     const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
     const body = {
       message: 'Atualiza data.json — ' + new Date().toISOString(),
@@ -1501,6 +1524,39 @@ function renderFluxoCaixa(){
   });
 }
 
+function atualizarMaterial(produtoId, campo, valor){
+  let m = materiais.find(m=>m.produtoId === produtoId);
+  if(!m){
+    m = { produtoId, codigoLinha:'', tamanhoAgulha:'', cor:'' };
+    materiais.push(m);
+  }
+  m[campo] = valor;
+  saveToGitHub();
+}
+
+function renderMateriais(){
+  const tbody = document.getElementById('tbodyMateriais');
+  const empty = document.getElementById('emptyMateriais');
+  tbody.innerHTML = '';
+  if(custos.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  custos.forEach(c=>{
+    const m = materiais.find(m=>m.produtoId === c.id) || { codigoLinha:'', tamanhoAgulha:'', cor:'' };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.codigo || '-'}</td>
+      <td>${c.nome || '-'}</td>
+      <td><input type="text" value="${m.codigoLinha || ''}" placeholder="Ex: L-102" onchange="atualizarMaterial('${c.id}','codigoLinha', this.value)"></td>
+      <td><input type="text" value="${m.tamanhoAgulha || ''}" placeholder="Ex: 3.5mm" onchange="atualizarMaterial('${c.id}','tamanhoAgulha', this.value)"></td>
+      <td><input type="text" value="${m.cor || ''}" placeholder="Ex: Bege" onchange="atualizarMaterial('${c.id}','cor', this.value)"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function renderAll(){
   popularFiltroAno();
   renderTabelaVendas();
@@ -1512,6 +1568,7 @@ function renderAll(){
   popularDropdownProdutosVenda();
   renderTabelaPrecificacao();
   renderFluxoCaixa();
+  renderMateriais();
 }
 
 // ============ INIT ============
