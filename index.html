@@ -174,6 +174,7 @@
   th{color:var(--text-muted);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;}
   td.num{text-align:right;font-variant-numeric:tabular-nums;}
   .del-btn{color:var(--red);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;background:none;border:none;font-family:var(--font-body);}
+  .edit-btn{color:var(--primary);cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;background:none;border:none;font-family:var(--font-body);margin-right:10px;}
   .empty{color:var(--text-muted);font-size:13px;padding:20px 0;text-align:center;}
   .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
   .badge.ok{background:#eaf0e8;color:var(--green);}
@@ -307,7 +308,8 @@
         </div>
         <div id="vencimentosContainer" style="display:none;grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;"></div>
         <div>
-          <button type="submit" class="primary">Adicionar</button>
+          <button type="submit" class="primary" id="btnSubmitVenda">Adicionar</button>
+          <button type="button" class="secondary" id="btnCancelarVenda" style="display:none;" onclick="cancelarEdicaoVenda()">Cancelar edição</button>
         </div>
       </form>
     </div>
@@ -380,7 +382,8 @@
           <input type="text" id="cCustoTotal" value="R$ 0,00" disabled>
         </div>
         <div>
-          <button type="submit" class="primary">Adicionar</button>
+          <button type="submit" class="primary" id="btnSubmitCusto">Adicionar</button>
+          <button type="button" class="secondary" id="btnCancelarCusto" style="display:none;" onclick="cancelarEdicaoCusto()">Cancelar edição</button>
         </div>
       </form>
     </div>
@@ -480,11 +483,11 @@
           <input type="text" id="pMargemAtualizada" value="0,00%" disabled>
         </div>
         <div>
-          <button type="submit" class="primary">Salvar precificação</button>
+          <button type="submit" class="primary" id="btnSubmitPrecificacao">Salvar precificação</button>
         </div>
       </form>
       <p style="font-size:11px;color:var(--text-muted);margin-top:10px">
-        Fórmula: preço sugerido = custo total ÷ (1 − margem desejada). A margem atualizada é recalculada com base no preço de venda ajustado.
+        Fórmula: preço sugerido = custo total ÷ (1 − margem desejada). A margem atualizada é recalculada com base no preço de venda ajustado. Clique em "editar" na tabela abaixo para carregar uma precificação já salva e ajustá-la.
       </p>
     </div>
 
@@ -541,8 +544,13 @@
           <input type="number" id="fcNumParcelas" min="1" step="1" value="2">
         </div>
         <div id="fcVencimentosContainer" style="display:none;grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;"></div>
+        <div id="fcVencimentoEdicaoContainer" style="display:none;">
+          <label>Vencimento</label>
+          <input type="date" id="fcVencimentoEdicao">
+        </div>
         <div>
-          <button type="submit" class="primary">Adicionar</button>
+          <button type="submit" class="primary" id="btnSubmitFc">Adicionar</button>
+          <button type="button" class="secondary" id="btnCancelarFc" style="display:none;" onclick="cancelarEdicaoFluxoCaixa()">Cancelar edição</button>
         </div>
       </form>
     </div>
@@ -801,6 +809,8 @@ document.getElementById('fPagamento').addEventListener('change', toggleParcelasU
 document.getElementById('fNumParcelas').addEventListener('input', gerarCamposVencimento);
 
 // ============ VENDAS: CRUD ============
+let editingVendaId = null;
+
 document.getElementById('formVenda').addEventListener('submit', (e)=>{
   e.preventDefault();
   const produtoId = document.getElementById('fProduto').value;
@@ -842,24 +852,40 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
     pagamentoLabel = `Parcelado (${numParcelas}x)`;
   }
 
-  // uma venda = um único registro, sempre com o valor cheio.
-  // as parcelas ficam guardadas só para efeito de fluxo de caixa (previsão de recebimento por data).
-  const vendaId = Date.now().toString(36);
-  vendas.push({
-    id: vendaId,
-    data: dataVenda,
-    vendedor,
-    produtoId,
-    produto: produtoNome,
-    pagamento: pagamentoLabel,
-    custoTotal,
-    precoVenda,
-    desconto,
-    valor: valorFinal,
-    margem: novaMargem,
-    parcelado: pagamento === 'Parcelado',
-    parcelas
-  });
+  const vendaId = editingVendaId || Date.now().toString(36);
+
+  if(editingVendaId){
+    const vendaAntiga = vendas.find(v=>v.id === editingVendaId);
+    if(vendaAntiga && vendaAntiga.produtoId !== produtoId){
+      const produtoAntigo = custos.find(c=>c.id === vendaAntiga.produtoId);
+      if(produtoAntigo) produtoAntigo.status = 'Em Estoque';
+    }
+    Object.assign(vendaAntiga, {
+      data: dataVenda, vendedor, produtoId, produto: produtoNome,
+      pagamento: pagamentoLabel, custoTotal, precoVenda, desconto,
+      valor: valorFinal, margem: novaMargem,
+      parcelado: pagamento === 'Parcelado', parcelas
+    });
+    fluxoCaixa = fluxoCaixa.filter(f=>f.vendaId !== vendaId);
+  } else {
+    // uma venda = um único registro, sempre com o valor cheio.
+    // as parcelas ficam guardadas só para efeito de fluxo de caixa (previsão de recebimento por data).
+    vendas.push({
+      id: vendaId,
+      data: dataVenda,
+      vendedor,
+      produtoId,
+      produto: produtoNome,
+      pagamento: pagamentoLabel,
+      custoTotal,
+      precoVenda,
+      desconto,
+      valor: valorFinal,
+      margem: novaMargem,
+      parcelado: pagamento === 'Parcelado',
+      parcelas
+    });
+  }
 
   // gera automaticamente os lançamentos de entrada no fluxo de caixa
   if(parcelas){
@@ -893,12 +919,59 @@ document.getElementById('formVenda').addEventListener('submit', (e)=>{
   }
 
   custo.status = 'Vendido';
+  const estavaEditando = !!editingVendaId;
   e.target.reset();
+  if(estavaEditando) cancelarEdicaoVenda();
   toggleParcelasUI();
   recalcVendaForm();
   renderAll();
   saveToGitHub();
 });
+
+function editarVenda(id){
+  const v = vendas.find(v=>v.id === id);
+  if(!v) return;
+  editingVendaId = id;
+  document.getElementById('fData').value = v.data || '';
+  document.getElementById('fVendedor').value = v.vendedor || '';
+  document.getElementById('fDesconto').value = v.desconto || 0;
+  document.getElementById('fPagamento').value = v.parcelado ? 'Parcelado' : (v.pagamento || 'Pix');
+  popularDropdownProdutosVenda();
+  // garante que o produto atual da venda apareça no select mesmo que já esteja "Vendido"
+  const select = document.getElementById('fProduto');
+  if(![...select.options].some(o=>o.value === v.produtoId) && v.produtoId){
+    const c = custos.find(c=>c.id === v.produtoId);
+    if(c){
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.codigo ? c.codigo + ' — ' : ''}${c.nome}`;
+      select.appendChild(opt);
+    }
+  }
+  select.value = v.produtoId || '';
+  toggleParcelasUI();
+  if(v.parcelado && v.parcelas){
+    document.getElementById('fNumParcelas').value = v.parcelas.length;
+    gerarCamposVencimento();
+    v.parcelas.forEach(p=>{
+      const campo = document.getElementById(`fVencimento_${p.numero}`);
+      if(campo) campo.value = p.vencimento;
+    });
+  }
+  recalcVendaForm();
+  document.getElementById('btnSubmitVenda').textContent = 'Salvar edição';
+  document.getElementById('btnCancelarVenda').style.display = 'inline-block';
+  document.getElementById('formVenda').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function cancelarEdicaoVenda(){
+  editingVendaId = null;
+  document.getElementById('formVenda').reset();
+  toggleParcelasUI();
+  recalcVendaForm();
+  document.getElementById('btnSubmitVenda').textContent = 'Adicionar';
+  document.getElementById('btnCancelarVenda').style.display = 'none';
+}
 
 function deleteVenda(id){
   if(!confirm('Remover esta venda?')) return;
@@ -909,6 +982,7 @@ function deleteVenda(id){
   }
   vendas = vendas.filter(v=>v.id !== id);
   fluxoCaixa = fluxoCaixa.filter(f=>f.vendaId !== id);
+  if(editingVendaId === id) cancelarEdicaoVenda();
   renderAll();
   saveToGitHub();
 }
@@ -944,6 +1018,8 @@ function recalcCustoForm(){
 });
 
 // ============ CUSTOS: CRUD ============
+let editingCustoId = null;
+
 document.getElementById('formCusto').addEventListener('submit', (e)=>{
   e.preventDefault();
   const qtdLinhas = parseFloat(document.getElementById('cQtdLinhas').value || '0');
@@ -955,28 +1031,63 @@ document.getElementById('formCusto').addEventListener('submit', (e)=>{
   const totalLinhas = qtdLinhas * custoLinha;
   const totalHoras = qtdHoras * custoHora;
   const custoTotal = totalLinhas + totalHoras + maoObraTerceira + frete;
+  const codigo = document.getElementById('cCodigo').value.trim();
+  const nome = document.getElementById('cNome').value.trim();
 
-  const custo = {
-    id: Date.now().toString(36),
-    codigo: document.getElementById('cCodigo').value.trim(),
-    nome: document.getElementById('cNome').value.trim(),
-    qtdLinhas, custoLinha, totalLinhas,
-    qtdHoras, custoHora, totalHoras,
-    maoObraTerceira,
-    frete,
-    custoTotal,
-    status: 'Em Estoque'
-  };
-  custos.push(custo);
+  if(editingCustoId){
+    const c = custos.find(c=>c.id === editingCustoId);
+    if(c){
+      Object.assign(c, { codigo, nome, qtdLinhas, custoLinha, totalLinhas, qtdHoras, custoHora, totalHoras, maoObraTerceira, frete, custoTotal });
+    }
+    cancelarEdicaoCusto();
+  } else {
+    custos.push({
+      id: Date.now().toString(36),
+      codigo, nome,
+      qtdLinhas, custoLinha, totalLinhas,
+      qtdHoras, custoHora, totalHoras,
+      maoObraTerceira,
+      frete,
+      custoTotal,
+      status: 'Em Estoque'
+    });
+  }
   e.target.reset();
   recalcCustoForm();
   renderAll();
   saveToGitHub();
 });
 
+function editarCusto(id){
+  const c = custos.find(c=>c.id === id);
+  if(!c) return;
+  editingCustoId = id;
+  document.getElementById('cCodigo').value = c.codigo || '';
+  document.getElementById('cNome').value = c.nome || '';
+  document.getElementById('cQtdLinhas').value = c.qtdLinhas || 0;
+  document.getElementById('cCustoLinha').value = c.custoLinha || 0;
+  document.getElementById('cQtdHoras').value = c.qtdHoras || 0;
+  document.getElementById('cCustoHora').value = c.custoHora || 0;
+  document.getElementById('cMaoObraTerceira').value = c.maoObraTerceira || 0;
+  document.getElementById('cFrete').value = c.frete || 0;
+  recalcCustoForm();
+  document.getElementById('btnSubmitCusto').textContent = 'Salvar edição';
+  document.getElementById('btnCancelarCusto').style.display = 'inline-block';
+  document.getElementById('formCusto').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function cancelarEdicaoCusto(){
+  editingCustoId = null;
+  document.getElementById('formCusto').reset();
+  recalcCustoForm();
+  document.getElementById('btnSubmitCusto').textContent = 'Adicionar';
+  document.getElementById('btnCancelarCusto').style.display = 'none';
+}
+
 function deleteCusto(id){
   if(!confirm('Remover este custo?')) return;
   custos = custos.filter(c=>c.id !== id);
+  if(editingCustoId === id) cancelarEdicaoCusto();
   renderAll();
   saveToGitHub();
 }
@@ -1082,6 +1193,19 @@ function deletePrecificacao(id){
   saveToGitHub();
 }
 
+function editarPrecificacao(id){
+  const p = precificacoes.find(p=>p.id === id);
+  if(!p) return;
+  popularDropdownProdutos();
+  document.getElementById('pProduto').value = p.produtoId;
+  document.getElementById('pMargemDesejada').value = p.margemDesejada || 0;
+  const ajusteInput = document.getElementById('pPrecoAjustado');
+  ajusteInput.value = p.precoAjustado || 0;
+  ajusteInput.dataset.touched = '1';
+  recalcPrecificacaoForm();
+  document.getElementById('formPrecificacao').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
 // ============ FLUXO DE CAIXA: parcelamento (mesmo padrão da aba de vendas) ============
 function toggleParcelasUIFC(){
   const parcelado = document.getElementById('fcPagamento').value === 'Parcelado';
@@ -1108,12 +1232,27 @@ document.getElementById('fcPagamento').addEventListener('change', toggleParcelas
 document.getElementById('fcNumParcelas').addEventListener('input', gerarCamposVencimentoFC);
 
 // ============ FLUXO DE CAIXA: CRUD (lançamentos manuais de custo/despesa) ============
+let editingFcId = null;
+
 document.getElementById('formFluxoCaixa').addEventListener('submit', (e)=>{
   e.preventDefault();
   const dataEmissao = document.getElementById('fcData').value;
   const descricao = document.getElementById('fcDescricao').value.trim();
   const valor = parseFloat(document.getElementById('fcValor').value || '0');
   const pagamento = document.getElementById('fcPagamento').value;
+
+  if(editingFcId){
+    const f = fluxoCaixa.find(f=>f.id === editingFcId);
+    if(f){
+      const vencimentoEdicao = document.getElementById('fcVencimentoEdicao').value || dataEmissao;
+      Object.assign(f, { dataEmissao, descricao, valor, formaPagamento: pagamento, vencimento: vencimentoEdicao });
+    }
+    cancelarEdicaoFluxoCaixa();
+    renderAll();
+    saveToGitHub();
+    return;
+  }
+
   const idBase = Date.now().toString(36);
 
   if(pagamento === 'Parcelado'){
@@ -1161,9 +1300,50 @@ document.getElementById('formFluxoCaixa').addEventListener('submit', (e)=>{
   saveToGitHub();
 });
 
+function editarFluxoCaixa(id){
+  const f = fluxoCaixa.find(f=>f.id === id);
+  if(!f) return;
+  editingFcId = id;
+
+  document.getElementById('fcData').value = f.dataEmissao || '';
+  document.getElementById('fcDescricao').value = f.descricao || '';
+  document.getElementById('fcValor').value = f.valor || 0;
+
+  const select = document.getElementById('fcPagamento');
+  if(![...select.options].some(o=>o.value === f.formaPagamento)){
+    const opt = document.createElement('option');
+    opt.value = f.formaPagamento;
+    opt.textContent = f.formaPagamento;
+    opt.dataset.temp = '1';
+    select.appendChild(opt);
+  }
+  select.value = f.formaPagamento;
+
+  // em modo de edição, sempre trata como um lançamento único (não reabre a criação de novas parcelas)
+  document.getElementById('fcParcelasContainer').style.display = 'none';
+  document.getElementById('fcVencimentosContainer').style.display = 'none';
+  document.getElementById('fcVencimentoEdicaoContainer').style.display = 'block';
+  document.getElementById('fcVencimentoEdicao').value = f.vencimento || f.dataEmissao || '';
+
+  document.getElementById('btnSubmitFc').textContent = 'Salvar edição';
+  document.getElementById('btnCancelarFc').style.display = 'inline-block';
+  document.getElementById('formFluxoCaixa').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function cancelarEdicaoFluxoCaixa(){
+  editingFcId = null;
+  document.getElementById('formFluxoCaixa').reset();
+  document.querySelectorAll('#fcPagamento option[data-temp="1"]').forEach(o=>o.remove());
+  document.getElementById('fcVencimentoEdicaoContainer').style.display = 'none';
+  toggleParcelasUIFC();
+  document.getElementById('btnSubmitFc').textContent = 'Adicionar';
+  document.getElementById('btnCancelarFc').style.display = 'none';
+}
+
 function deleteFluxoCaixa(id){
   if(!confirm('Remover este lançamento?')) return;
   fluxoCaixa = fluxoCaixa.filter(f=>f.id !== id);
+  if(editingFcId === id) cancelarEdicaoFluxoCaixa();
   renderAll();
   saveToGitHub();
 }
@@ -1190,19 +1370,15 @@ function renderTabelaVendas(){
   empty.style.display = 'none';
   ordenadas.forEach(v=>{
     const tr = document.createElement('tr');
-    const vencimentoHtml = (v.parcelado && v.parcelas)
-      ? v.parcelas.map(p => new Date(p.vencimento+'T00:00:00').toLocaleDateString('pt-BR')).join(' • ')
-      : (v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-');
     tr.innerHTML = `
       <td>${v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
       <td>${v.vendedor || '-'}</td>
       <td>${v.produto || '-'}</td>
       <td>${v.pagamento || '-'}</td>
-      <td style="font-size:12px;">${vencimentoHtml}</td>
       <td class="num">${fmtMoeda(v.desconto)}</td>
       <td class="num">${fmtMoeda(v.valor)}</td>
       <td class="num">${(v.margem||0).toFixed(2).replace('.',',')}%</td>
-      <td><button class="del-btn" onclick="deleteVenda('${v.id}')">remover</button></td>
+      <td><button class="edit-btn" onclick="editarVenda('${v.id}')">editar</button><button class="del-btn" onclick="deleteVenda('${v.id}')">remover</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1340,7 +1516,7 @@ function renderTabelaCustos(){
       <td class="num">${fmtMoeda(c.maoObraTerceira)}</td>
       <td class="num">${fmtMoeda(c.frete)}</td>
       <td class="num">${fmtMoeda(c.custoTotal)}</td>
-      <td><button class="del-btn" onclick="deleteCusto('${c.id}')">remover</button></td>
+      <td><button class="edit-btn" onclick="editarCusto('${c.id}')">editar</button><button class="del-btn" onclick="deleteCusto('${c.id}')">remover</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1364,7 +1540,7 @@ function renderTabelaPrecificacao(){
       <td class="num">${fmtMoeda(p.precoSugerido)}</td>
       <td class="num">${fmtMoeda(p.precoAjustado)}</td>
       <td class="num">${(p.margemAtualizada||0).toFixed(2).replace('.',',')}%</td>
-      <td><button class="del-btn" onclick="deletePrecificacao('${p.id}')">remover</button></td>
+      <td><button class="edit-btn" onclick="editarPrecificacao('${p.id}')">editar</button><button class="del-btn" onclick="deletePrecificacao('${p.id}')">remover</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1518,7 +1694,7 @@ function renderFluxoCaixa(){
       <td>${f.vencimento ? new Date(f.vencimento+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
       <td class="num" style="color:${f.tipo==='Entrada' ? 'var(--green)' : 'var(--red)'};">${f.tipo==='Saída' ? '-' : ''}${fmtMoeda(f.valor)}</td>
       <td style="text-align:center"><input type="checkbox" onchange="togglePagoFluxoCaixa('${f.id}', this.checked)" ${f.pago ? 'checked' : ''} style="width:auto;cursor:pointer;"></td>
-      <td><button class="del-btn" onclick="deleteFluxoCaixa('${f.id}')">remover</button></td>
+      <td><button class="edit-btn" onclick="editarFluxoCaixa('${f.id}')">editar</button><button class="del-btn" onclick="deleteFluxoCaixa('${f.id}')">remover</button></td>
     `;
     tbody.appendChild(tr);
   });
