@@ -85,6 +85,17 @@
       "precoSugerido": 523.81,
       "precoAjustado": 0,
       "margemAtualizada": 0
+    },
+    {
+      "id": "mrti28fe",
+      "produtoId": "mrthwv1s",
+      "produtoNome": "Saia Bella",
+      "produtoCodigo": "02",
+      "custoTotal": 433.6,
+      "margemDesejada": 0,
+      "precoSugerido": 433.6,
+      "precoAjustado": 350,
+      "margemAtualizada": -23.885714285714293
     }
   ],
   "fluxoCaixa": [
