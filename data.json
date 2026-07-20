@@ -49,17 +49,6 @@
   ],
   "precificacoes": [
     {
-      "id": "mrt7fk1y",
-      "produtoId": "mrp8sf5w",
-      "produtoNome": "Conjunto Preto Mykonos",
-      "produtoCodigo": "MKYNOS",
-      "custoTotal": 523.81,
-      "margemDesejada": 0,
-      "precoSugerido": 523.81,
-      "precoAjustado": 0,
-      "margemAtualizada": 0
-    },
-    {
       "id": "mrti28fe",
       "produtoId": "mrthwv1s",
       "produtoNome": "Saia Bella",
