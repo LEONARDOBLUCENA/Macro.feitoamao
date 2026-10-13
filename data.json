@@ -454,7 +454,7 @@
       "vencimento": "2026-09-18",
       "origem": "venda",
       "vendaId": "mv6q48wc",
-      "pago": false
+      "pago": true
     }
   ],
   "materiais": [
