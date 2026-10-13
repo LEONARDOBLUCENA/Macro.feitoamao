@@ -226,6 +226,21 @@
       "frete": 28.51,
       "custoTotal": 715.71,
       "status": "Em Estoque"
+    },
+    {
+      "id": "mv6q22lr",
+      "codigo": "09",
+      "nome": "Vestido noiva",
+      "qtdLinhas": 6,
+      "custoLinha": 31.2,
+      "totalLinhas": 187.2,
+      "qtdHoras": 0,
+      "custoHora": 0,
+      "totalHoras": 0,
+      "maoObraTerceira": 0,
+      "frete": 28.3,
+      "custoTotal": 215.5,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
