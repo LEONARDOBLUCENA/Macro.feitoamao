@@ -196,6 +196,21 @@
       "frete": 0,
       "custoTotal": 124.8,
       "status": "Vendido"
+    },
+    {
+      "id": "mv6prin8",
+      "codigo": "07",
+      "nome": "Vestido Vedra",
+      "qtdLinhas": 4,
+      "custoLinha": 31.2,
+      "totalLinhas": 124.8,
+      "qtdHoras": 0,
+      "custoHora": 0,
+      "totalHoras": 0,
+      "maoObraTerceira": 400,
+      "frete": 22.29,
+      "custoTotal": 547.0899999999999,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
