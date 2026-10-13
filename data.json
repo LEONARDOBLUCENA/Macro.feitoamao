@@ -487,6 +487,12 @@
       "codigoLinha": "1004",
       "tamanhoAgulha": "2,5",
       "cor": "Preto"
+    },
+    {
+      "produtoId": "mv6op9gt",
+      "codigoLinha": "",
+      "tamanhoAgulha": "",
+      "cor": "Branco"
     }
   ]
 }
