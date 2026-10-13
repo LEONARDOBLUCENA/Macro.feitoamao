@@ -197,6 +197,12 @@
       "codigoLinha": "1002",
       "tamanhoAgulha": "3,0",
       "cor": "Pérola"
+    },
+    {
+      "produtoId": "mrthy6er",
+      "codigoLinha": "1002",
+      "tamanhoAgulha": "",
+      "cor": ""
     }
   ]
 }
