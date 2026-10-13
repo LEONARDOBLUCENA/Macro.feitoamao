@@ -337,7 +337,7 @@
       "vencimento": "2026-02-28",
       "origem": "venda",
       "vendaId": "mv6p9vtw",
-      "pago": false
+      "pago": true
     },
     {
       "id": "mv6pa5b4-fc",
