@@ -279,6 +279,17 @@
       "precoSugerido": 124.8,
       "precoAjustado": 1150,
       "margemAtualizada": 89.14782608695653
+    },
+    {
+      "id": "mv6psylm",
+      "produtoId": "mv6prin8",
+      "produtoNome": "Vestido Vedra",
+      "produtoCodigo": "07",
+      "custoTotal": 547.0899999999999,
+      "margemDesejada": 0,
+      "precoSugerido": 547.0899999999999,
+      "precoAjustado": 1590,
+      "margemAtualizada": 65.59182389937106
     }
   ],
   "fluxoCaixa": [
