@@ -70,11 +70,11 @@
       "custoLinha": 31.9,
       "totalLinhas": 63.8,
       "qtdHoras": 10,
-      "custoHora": 100,
-      "totalHoras": 1000,
+      "custoHora": 40,
+      "totalHoras": 400,
       "maoObraTerceira": 0,
       "frete": 0,
-      "custoTotal": 1063.8,
+      "custoTotal": 463.8,
       "status": "Vendido"
     }
   ],
