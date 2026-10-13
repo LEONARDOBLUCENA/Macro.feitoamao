@@ -242,7 +242,7 @@
       "vencimento": "2026-08-20",
       "origem": "venda",
       "vendaId": "mv6ol8jk",
-      "pago": false
+      "pago": true
     }
   ],
   "materiais": [
