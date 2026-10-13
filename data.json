@@ -136,6 +136,21 @@
       "frete": 0,
       "custoTotal": 212.4,
       "status": "Vendido"
+    },
+    {
+      "id": "mv6op9gt",
+      "codigo": "06",
+      "nome": "Vestido Nammos",
+      "qtdLinhas": 4,
+      "custoLinha": 31.2,
+      "totalLinhas": 124.8,
+      "qtdHoras": 0,
+      "custoHora": 0,
+      "totalHoras": 0,
+      "maoObraTerceira": 0,
+      "frete": 0,
+      "custoTotal": 124.8,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
