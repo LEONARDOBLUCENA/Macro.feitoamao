@@ -23,10 +23,10 @@
       "produto": "05 — Vestido perola de gota",
       "pagamento": "Pix",
       "custoTotal": 212.4,
-      "precoVenda": 0,
+      "precoVenda": 1150,
       "desconto": 0,
-      "valor": 0,
-      "margem": 0,
+      "valor": 1150,
+      "margem": 81.5304347826087,
       "parcelado": false,
       "parcelas": null
     },
@@ -203,6 +203,18 @@
       "vencimento": "2026-07-22",
       "origem": "venda",
       "vendaId": "mv6ntuh4",
+      "pago": false
+    },
+    {
+      "id": "mv6o7y3i-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-22",
+      "descricao": "Venda — 05 — Vestido perola de gota",
+      "valor": 1150,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-07-22",
+      "origem": "venda",
+      "vendaId": "mv6o7y3i",
       "pago": false
     }
   ],
