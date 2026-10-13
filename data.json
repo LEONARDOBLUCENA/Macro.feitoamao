@@ -182,18 +182,6 @@
   ],
   "fluxoCaixa": [
     {
-      "id": "mv6ntuh4-fc",
-      "tipo": "Entrada",
-      "dataEmissao": "2026-07-22",
-      "descricao": "Venda — 04 — Vestido branco Mykonos",
-      "valor": 0,
-      "formaPagamento": "Pix",
-      "vencimento": "2026-07-22",
-      "origem": "venda",
-      "vendaId": "mv6ntuh4",
-      "pago": false
-    },
-    {
       "id": "mv6oibse-fc",
       "tipo": "Entrada",
       "dataEmissao": "2026-07-29",
