@@ -208,6 +208,17 @@
       "precoSugerido": 212.4,
       "precoAjustado": 1150,
       "margemAtualizada": 81.5304347826087
+    },
+    {
+      "id": "mv6p8euo",
+      "produtoId": "mv6op9gt",
+      "produtoNome": "Vestido Tulum",
+      "produtoCodigo": "06",
+      "custoTotal": 124.8,
+      "margemDesejada": 0,
+      "precoSugerido": 124.8,
+      "precoAjustado": 1150,
+      "margemAtualizada": 89.14782608695653
     }
   ],
   "fluxoCaixa": [
