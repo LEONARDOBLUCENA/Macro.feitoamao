@@ -191,5 +191,12 @@
       "pago": false
     }
   ],
-  "materiais": []
+  "materiais": [
+    {
+      "produtoId": "mrthwv1s",
+      "codigoLinha": "1002",
+      "tamanhoAgulha": "",
+      "cor": ""
+    }
+  ]
 }
