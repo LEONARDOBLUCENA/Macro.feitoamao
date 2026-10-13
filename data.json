@@ -194,18 +194,6 @@
       "pago": false
     },
     {
-      "id": "mv6o7y3i-fc",
-      "tipo": "Entrada",
-      "dataEmissao": "2026-07-22",
-      "descricao": "Venda — 05 — Vestido perola de gota",
-      "valor": 0,
-      "formaPagamento": "Pix",
-      "vencimento": "2026-07-22",
-      "origem": "venda",
-      "vendaId": "mv6o7y3i",
-      "pago": false
-    },
-    {
       "id": "mv6oibse-fc",
       "tipo": "Entrada",
       "dataEmissao": "2026-07-29",
