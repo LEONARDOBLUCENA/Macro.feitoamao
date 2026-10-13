@@ -59,6 +59,21 @@
       "margem": 62.3158273381295,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6p9aj5",
+      "data": "2026-10-05",
+      "vendedor": "Ariane",
+      "produtoId": "mv6op9gt",
+      "produto": "06 — Vestido Tulum",
+      "pagamento": "Pix",
+      "custoTotal": 124.8,
+      "precoVenda": 1150,
+      "desconto": 0,
+      "valor": 1150,
+      "margem": 89.14782608695653,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -150,7 +165,7 @@
       "maoObraTerceira": 0,
       "frete": 0,
       "custoTotal": 124.8,
-      "status": "Em Estoque"
+      "status": "Vendido"
     }
   ],
   "precificacoes": [
@@ -269,6 +284,18 @@
       "origem": "venda",
       "vendaId": "mv6ol8jk",
       "pago": true
+    },
+    {
+      "id": "mv6p9aj5-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-10-05",
+      "descricao": "Venda — 06 — Vestido Tulum",
+      "valor": 1150,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-10-05",
+      "origem": "venda",
+      "vendaId": "mv6p9aj5",
+      "pago": false
     }
   ],
   "materiais": [
