@@ -45,6 +45,21 @@
       "frete": 35,
       "custoTotal": 447.4,
       "status": "Em Estoque"
+    },
+    {
+      "id": "mv6nq0a9",
+      "codigo": "04",
+      "nome": "Vestido branco Mykonos",
+      "qtdLinhas": 2,
+      "custoLinha": 31.9,
+      "totalLinhas": 63.8,
+      "qtdHoras": 0,
+      "custoHora": 0,
+      "totalHoras": 0,
+      "maoObraTerceira": 0,
+      "frete": 0,
+      "custoTotal": 63.8,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
