@@ -104,6 +104,21 @@
       "margem": 65.59182389937106,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6q48wc",
+      "data": "2026-09-18",
+      "vendedor": "Paola",
+      "produtoId": "mv6q22lr",
+      "produto": "09 — Vestido noiva",
+      "pagamento": "Pix",
+      "custoTotal": 215.5,
+      "precoVenda": 1700,
+      "desconto": 0,
+      "valor": 1700,
+      "margem": 87.32352941176471,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -240,7 +255,7 @@
       "maoObraTerceira": 0,
       "frete": 28.3,
       "custoTotal": 215.5,
-      "status": "Em Estoque"
+      "status": "Vendido"
     }
   ],
   "precificacoes": [
@@ -427,6 +442,18 @@
       "vencimento": "2026-10-07",
       "origem": "venda",
       "vendaId": "mv6ptaj8",
+      "pago": false
+    },
+    {
+      "id": "mv6q48wc-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-09-18",
+      "descricao": "Venda — 09 — Vestido noiva",
+      "valor": 1700,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-09-18",
+      "origem": "venda",
+      "vendaId": "mv6q48wc",
       "pago": false
     }
   ],
