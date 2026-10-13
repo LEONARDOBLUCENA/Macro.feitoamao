@@ -89,6 +89,21 @@
       "margem": -23.885714285714293,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6pa5b4",
+      "data": "2026-07-22",
+      "vendedor": "Karla Januario",
+      "produtoId": "mrthy6er",
+      "produto": "03 — Vestido pérola irregular",
+      "pagamento": "Pix",
+      "custoTotal": 497.4,
+      "precoVenda": 1150,
+      "desconto": 0,
+      "valor": 1150,
+      "margem": 56.74782608695652,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -135,7 +150,7 @@
       "maoObraTerceira": 0,
       "frete": 35,
       "custoTotal": 497.4,
-      "status": "Em Estoque"
+      "status": "Vendido"
     },
     {
       "id": "mv6nq0a9",
@@ -322,6 +337,18 @@
       "vencimento": "2026-02-28",
       "origem": "venda",
       "vendaId": "mv6p9vtw",
+      "pago": false
+    },
+    {
+      "id": "mv6pa5b4-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-22",
+      "descricao": "Venda — 03 — Vestido pérola irregular",
+      "valor": 1150,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-07-22",
+      "origem": "venda",
+      "vendaId": "mv6pa5b4",
       "pago": false
     }
   ],
