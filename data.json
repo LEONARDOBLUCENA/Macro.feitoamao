@@ -39,11 +39,11 @@
       "custoLinha": 31.2,
       "totalLinhas": 62.4,
       "qtdHoras": 10,
-      "custoHora": 35,
-      "totalHoras": 350,
+      "custoHora": 100,
+      "totalHoras": 1000,
       "maoObraTerceira": 0,
       "frete": 35,
-      "custoTotal": 447.4,
+      "custoTotal": 1097.4,
       "status": "Em Estoque"
     },
     {
