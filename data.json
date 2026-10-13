@@ -493,6 +493,12 @@
       "codigoLinha": "1001",
       "tamanhoAgulha": "3,0",
       "cor": "Branco"
+    },
+    {
+      "produtoId": "mv6pyv3s",
+      "codigoLinha": "",
+      "tamanhoAgulha": "2,5",
+      "cor": ""
     }
   ]
 }
