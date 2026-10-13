@@ -104,6 +104,21 @@
       "margem": 56.74782608695652,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6ptaj8",
+      "data": "2026-10-07",
+      "vendedor": "Ed Januario",
+      "produtoId": "mv6prin8",
+      "produto": "07 — Vestido Vedra",
+      "pagamento": "Pix",
+      "custoTotal": 547.0899999999999,
+      "precoVenda": 1590,
+      "desconto": 0,
+      "valor": 1590,
+      "margem": 65.59182389937106,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -210,7 +225,7 @@
       "maoObraTerceira": 400,
       "frete": 22.29,
       "custoTotal": 547.0899999999999,
-      "status": "Em Estoque"
+      "status": "Vendido"
     }
   ],
   "precificacoes": [
@@ -376,6 +391,18 @@
       "origem": "venda",
       "vendaId": "mv6pa5b4",
       "pago": true
+    },
+    {
+      "id": "mv6ptaj8-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-10-07",
+      "descricao": "Venda — 07 — Vestido Vedra",
+      "valor": 1590,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-10-07",
+      "origem": "venda",
+      "vendaId": "mv6ptaj8",
+      "pago": false
     }
   ],
   "materiais": [
