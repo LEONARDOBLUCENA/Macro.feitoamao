@@ -211,6 +211,21 @@
       "frete": 22.29,
       "custoTotal": 547.0899999999999,
       "status": "Vendido"
+    },
+    {
+      "id": "mv6pyv3s",
+      "codigo": "08",
+      "nome": "Vestido Amber",
+      "qtdLinhas": 6,
+      "custoLinha": 31.2,
+      "totalLinhas": 187.2,
+      "qtdHoras": 0,
+      "custoHora": 0,
+      "totalHoras": 0,
+      "maoObraTerceira": 500,
+      "frete": 28.51,
+      "custoTotal": 715.71,
+      "status": "Em Estoque"
     }
   ],
   "precificacoes": [
