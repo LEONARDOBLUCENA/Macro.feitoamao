@@ -14,6 +14,21 @@
       "margem": 0,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6o7y3i",
+      "data": "2026-07-22",
+      "vendedor": "Karla Januario",
+      "produtoId": "mv6o70wu",
+      "produto": "05 — Vestido perola de gota",
+      "pagamento": "Pix",
+      "custoTotal": 212.4,
+      "precoVenda": 0,
+      "desconto": 0,
+      "valor": 0,
+      "margem": 0,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -90,7 +105,7 @@
       "maoObraTerceira": 150,
       "frete": 0,
       "custoTotal": 212.4,
-      "status": "Em Estoque"
+      "status": "Vendido"
     }
   ],
   "precificacoes": [
@@ -150,6 +165,18 @@
       "vencimento": "2026-07-22",
       "origem": "venda",
       "vendaId": "mv6ntuh4",
+      "pago": false
+    },
+    {
+      "id": "mv6o7y3i-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-22",
+      "descricao": "Venda — 05 — Vestido perola de gota",
+      "valor": 0,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-07-22",
+      "origem": "venda",
+      "vendaId": "mv6o7y3i",
       "pago": false
     }
   ],
