@@ -208,13 +208,19 @@
       "produtoId": "mv6o70wu",
       "codigoLinha": "1002",
       "tamanhoAgulha": "2,5",
-      "cor": ""
+      "cor": "Pérola"
     },
     {
       "produtoId": "mv6nq0a9",
       "codigoLinha": "",
       "tamanhoAgulha": "3,0",
       "cor": "Branco"
+    },
+    {
+      "produtoId": "mrp8sf5w",
+      "codigoLinha": "",
+      "tamanhoAgulha": "2,5",
+      "cor": ""
     }
   ]
 }
