@@ -152,6 +152,17 @@
       "precoSugerido": 497.4,
       "precoAjustado": 1150,
       "margemAtualizada": 56.74782608695652
+    },
+    {
+      "id": "mv6o88qk",
+      "produtoId": "mv6o70wu",
+      "produtoNome": "Vestido perola de gota",
+      "produtoCodigo": "05",
+      "custoTotal": 212.4,
+      "margemDesejada": 0,
+      "precoSugerido": 212.4,
+      "precoAjustado": 1150,
+      "margemAtualizada": 81.5304347826087
     }
   ],
   "fluxoCaixa": [
