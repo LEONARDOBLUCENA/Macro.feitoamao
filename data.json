@@ -331,6 +331,17 @@
       "precoSugerido": 715.71,
       "precoAjustado": 1999,
       "margemAtualizada": 64.19659829914957
+    },
+    {
+      "id": "mv6q2hmx",
+      "produtoId": "mv6q22lr",
+      "produtoNome": "Vestido noiva",
+      "produtoCodigo": "09",
+      "custoTotal": 215.5,
+      "margemDesejada": 0,
+      "precoSugerido": 215.5,
+      "precoAjustado": 1700,
+      "margemAtualizada": 87.32352941176471
     }
   ],
   "fluxoCaixa": [
