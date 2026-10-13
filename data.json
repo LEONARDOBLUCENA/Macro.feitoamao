@@ -9,7 +9,7 @@
       "pagamento": "Pix",
       "custoTotal": 1063.8,
       "precoVenda": 0,
-      "desconto": 0,
+      "desconto": 63.8,
       "valor": 0,
       "margem": 0,
       "parcelado": false,
