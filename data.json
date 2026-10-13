@@ -180,7 +180,20 @@
       "margemAtualizada": 81.5304347826087
     }
   ],
-  "fluxoCaixa": [],
+  "fluxoCaixa": [
+    {
+      "id": "mv6oibse-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-29",
+      "descricao": "Venda — 05 — Vestido perola de gota",
+      "valor": 1150,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-07-29",
+      "origem": "venda",
+      "vendaId": "mv6oibse",
+      "pago": false
+    }
+  ],
   "materiais": [
     {
       "produtoId": "mrthwv1s",
