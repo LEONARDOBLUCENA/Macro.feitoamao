@@ -74,6 +74,21 @@
       "margem": 89.14782608695653,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6p9vtw",
+      "data": "2026-02-28",
+      "vendedor": "Isabella",
+      "produtoId": "mrthwv1s",
+      "produto": "02 — Saia Bella",
+      "pagamento": "Pix",
+      "custoTotal": 433.6,
+      "precoVenda": 350,
+      "desconto": 0,
+      "valor": 350,
+      "margem": -23.885714285714293,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -105,7 +120,7 @@
       "maoObraTerceira": 0,
       "frete": 40,
       "custoTotal": 433.6,
-      "status": "Em Estoque"
+      "status": "Vendido"
     },
     {
       "id": "mrthy6er",
@@ -295,6 +310,18 @@
       "vencimento": "2026-10-05",
       "origem": "venda",
       "vendaId": "mv6p9aj5",
+      "pago": false
+    },
+    {
+      "id": "mv6p9vtw-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-02-28",
+      "descricao": "Venda — 02 — Saia Bella",
+      "valor": 350,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-02-28",
+      "origem": "venda",
+      "vendaId": "mv6p9vtw",
       "pago": false
     }
   ],
