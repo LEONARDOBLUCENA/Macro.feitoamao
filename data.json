@@ -8,10 +8,10 @@
       "produto": "04 — Vestido branco Mykonos",
       "pagamento": "Pix",
       "custoTotal": 463.8,
-      "precoVenda": 0,
+      "precoVenda": 1000,
       "desconto": 0,
-      "valor": 0,
-      "margem": 0,
+      "valor": 1000,
+      "margem": 53.620000000000005,
       "parcelado": false,
       "parcelas": null
     },
@@ -105,7 +105,7 @@
       "maoObraTerceira": 0,
       "frete": 0,
       "custoTotal": 463.8,
-      "status": "Em Estoque"
+      "status": "Vendido"
     },
     {
       "id": "mv6o70wu",
@@ -191,6 +191,18 @@
       "vencimento": "2026-07-29",
       "origem": "venda",
       "vendaId": "mv6oibse",
+      "pago": false
+    },
+    {
+      "id": "mv6ntuh4-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-07-22",
+      "descricao": "Venda — 04 — Vestido branco Mykonos",
+      "valor": 1000,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-07-22",
+      "origem": "venda",
+      "vendaId": "mv6ntuh4",
       "pago": false
     }
   ],
