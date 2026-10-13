@@ -100,6 +100,17 @@
       "precoSugerido": 1378.4473684210525,
       "precoAjustado": 1390,
       "margemAtualizada": 62.3158273381295
+    },
+    {
+      "id": "mv6o32hl",
+      "produtoId": "mv6nq0a9",
+      "produtoNome": "Vestido branco Mykonos",
+      "produtoCodigo": "04",
+      "custoTotal": 463.8,
+      "margemDesejada": 0,
+      "precoSugerido": 463.8,
+      "precoAjustado": 1000,
+      "margemAtualizada": 53.620000000000005
     }
   ],
   "fluxoCaixa": [
