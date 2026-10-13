@@ -44,6 +44,21 @@
       "margem": 81.5304347826087,
       "parcelado": false,
       "parcelas": null
+    },
+    {
+      "id": "mv6ol8jk",
+      "data": "2026-08-20",
+      "vendedor": "Rosane Licks",
+      "produtoId": "mrp8sf5w",
+      "produto": "01 — Conjunto Preto Mykonos",
+      "pagamento": "Pix",
+      "custoTotal": 523.81,
+      "precoVenda": 1390,
+      "desconto": 0,
+      "valor": 1390,
+      "margem": 62.3158273381295,
+      "parcelado": false,
+      "parcelas": null
     }
   ],
   "custos": [
@@ -60,7 +75,7 @@
       "maoObraTerceira": 290,
       "frete": 46.61,
       "custoTotal": 523.81,
-      "status": "Em Estoque"
+      "status": "Vendido"
     },
     {
       "id": "mrthwv1s",
@@ -215,6 +230,18 @@
       "vencimento": "2026-07-22",
       "origem": "venda",
       "vendaId": "mv6o7y3i",
+      "pago": false
+    },
+    {
+      "id": "mv6ol8jk-fc",
+      "tipo": "Entrada",
+      "dataEmissao": "2026-08-20",
+      "descricao": "Venda — 01 — Conjunto Preto Mykonos",
+      "valor": 1390,
+      "formaPagamento": "Pix",
+      "vencimento": "2026-08-20",
+      "origem": "venda",
+      "vendaId": "mv6ol8jk",
       "pago": false
     }
   ],
