@@ -305,6 +305,17 @@
       "precoSugerido": 547.0899999999999,
       "precoAjustado": 1590,
       "margemAtualizada": 65.59182389937106
+    },
+    {
+      "id": "mv6pzd6d",
+      "produtoId": "mv6pyv3s",
+      "produtoNome": "Vestido Amber",
+      "produtoCodigo": "08",
+      "custoTotal": 715.71,
+      "margemDesejada": 0,
+      "precoSugerido": 715.71,
+      "precoAjustado": 1999,
+      "margemAtualizada": 64.19659829914957
     }
   ],
   "fluxoCaixa": [
